@@ -1,0 +1,1190 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8">
+<title>Generator Catatan Pengemasan Batch</title>
+<style>
+  :root{
+    --navy:#0D3685;
+    --navy-dark:#092B69;
+    --navy-light:#EAF0FB;
+    --ink:#1B2233;
+    --muted:#5B6478;
+    --line:#DCE2F0;
+    --bg:#F5F7FC;
+    --amber:#F2A900;
+    --card:#FFFFFF;
+  }
+  *{box-sizing:border-box;}
+  body{
+    margin:0;
+    font-family:"Segoe UI", Roboto, Arial, sans-serif;
+    background:var(--bg);
+    color:var(--ink);
+    padding-bottom:100px;
+  }
+  .topbar{
+    background:var(--navy);
+    color:#fff;
+    padding:18px 24px;
+    display:flex;
+    align-items:center;
+    gap:14px;
+  }
+  .topbar .badge{
+    width:36px;height:36px;border-radius:8px;background:#fff;color:var(--navy);
+    display:flex;align-items:center;justify-content:center;font-weight:800;font-size:14px;
+    letter-spacing:0.5px;
+  }
+  .topbar h1{font-size:16px;margin:0;font-weight:700;letter-spacing:.2px;}
+  .topbar p{margin:2px 0 0;font-size:12px;color:#C9D6F2;}
+
+  .wrap{max-width:920px;margin:0 auto;padding:22px 18px;}
+
+  .section{
+    background:var(--card);
+    border:1px solid var(--line);
+    border-radius:10px;
+    margin-bottom:16px;
+    overflow:hidden;
+  }
+  .section-head{
+    background:var(--navy-light);
+    padding:12px 18px;
+    display:flex;
+    align-items:baseline;
+    gap:10px;
+    border-bottom:1px solid var(--line);
+  }
+  .section-head .num{
+    font-weight:800;color:var(--navy);font-size:13px;
+    background:#fff;border:1.5px solid var(--navy);border-radius:6px;
+    width:22px;height:22px;display:flex;align-items:center;justify-content:center;flex:none;
+  }
+  .section-head h2{font-size:14.5px;margin:0;color:var(--navy-dark);letter-spacing:.2px;}
+  .section-head .hint{font-size:11.5px;color:var(--muted);margin-left:auto;}
+  .section-body{padding:16px 18px 18px;}
+
+  .grid{display:grid;grid-template-columns:repeat(2,1fr);gap:12px 14px;}
+  .grid3{display:grid;grid-template-columns:repeat(3,1fr);gap:12px 14px;}
+  .full{grid-column:1/-1;}
+
+  label{display:block;font-size:12px;font-weight:600;color:var(--muted);margin-bottom:5px;}
+  input[type=text], input[type=date], input[type=number], input[type=password], input[type=email], textarea, select{
+    width:100%;
+    padding:8px 10px;
+    border:1px solid var(--line);
+    border-radius:7px;
+    font-size:13px;
+    font-family:inherit;
+    color:var(--ink);
+    background:#fff;
+  }
+  input:focus, textarea:focus, select:focus{outline:2px solid var(--navy); outline-offset:1px; border-color:var(--navy);}
+  textarea{resize:vertical;min-height:44px;}
+  .field{margin-bottom:0;}
+
+  .kemasan-table{width:100%;border-collapse:collapse;margin-top:8px;}
+  .kemasan-table th{
+    background:var(--navy-light);color:var(--navy-dark);font-size:11.5px;text-align:left;
+    padding:7px 8px;border:1px solid var(--line);
+  }
+  .kemasan-table td{border:1px solid var(--line);padding:6px 7px;vertical-align:top;}
+  .kemasan-table input{padding:6px 8px;font-size:12.5px;}
+  .kemasan-empty{color:var(--muted);font-size:12.5px;font-style:italic;padding:10px 4px;}
+
+  .machine-row, .comp-row{display:flex;gap:8px;margin-bottom:8px;align-items:center;}
+  .machine-row input{flex:1;}
+  .btn-icon{
+    border:none;background:#FDECEC;color:#C0392B;border-radius:6px;width:30px;height:30px;
+    cursor:pointer;font-size:15px;line-height:1;flex:none;
+  }
+  .btn-add{
+    border:1px dashed var(--navy);background:var(--navy-light);color:var(--navy-dark);
+    border-radius:7px;padding:7px 12px;font-size:12.5px;font-weight:600;cursor:pointer;
+  }
+  .btn-add:hover{background:#DCE7FB;}
+
+  .checkline{display:flex;align-items:flex-start;gap:8px;padding:7px 0;font-size:13px;border-bottom:1px solid #F0F2F8;}
+  .checkline:last-child{border-bottom:none;}
+  .checkline input{width:16px;height:16px;margin-top:2px;flex:none;}
+  .checkline .lbl{font-weight:600;color:var(--ink);}
+  .checkline .sub{color:var(--muted);font-size:11.5px;display:block;margin-top:1px;}
+
+  .autoflag{
+    display:inline-block;font-size:10.5px;font-weight:700;color:#0A6E45;background:#E4F6EC;
+    border-radius:5px;padding:2px 6px;margin-left:6px;letter-spacing:.2px;
+  }
+
+  .footer-bar{
+    position:fixed;left:0;right:0;bottom:0;background:#fff;border-top:1px solid var(--line);
+    padding:12px 18px;display:flex;justify-content:center;gap:12px;box-shadow:0 -4px 14px rgba(20,30,60,.06);
+    z-index:50;
+  }
+  .footer-bar .inner{max-width:920px;width:100%;display:flex;gap:12px;align-items:center;}
+  .filename-preview{flex:1;font-size:12px;color:var(--muted);overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
+  .filename-preview b{color:var(--ink);}
+  .generate-btn{
+    background:var(--navy);color:#fff;border:none;border-radius:8px;padding:11px 22px;
+    font-size:13.5px;font-weight:700;cursor:pointer;letter-spacing:.2px;white-space:nowrap;
+  }
+  .generate-btn:hover{background:var(--navy-dark);}
+  .generate-btn:disabled{background:#AAB4CC;cursor:not-allowed;}
+
+  .req::after{content:" *";color:#C0392B;}
+  .search-wrap{position:relative;}
+  .search-results{
+    position:absolute;top:100%;left:0;right:0;background:#fff;border:1px solid var(--line);
+    border-radius:7px;max-height:230px;overflow-y:auto;z-index:20;box-shadow:0 8px 20px rgba(20,30,60,.12);
+    display:none;
+  }
+  .search-results.show{display:block;}
+  .search-results div{padding:8px 10px;font-size:12.5px;cursor:pointer;border-bottom:1px solid #F0F2F8;}
+  .search-results div:hover{background:var(--navy-light);}
+  .komponen-preview{
+    background:#FBFCFE;border:1px solid var(--line);border-radius:7px;padding:9px 11px;
+    font-size:12.5px;color:var(--ink);white-space:pre-line;margin-top:6px;min-height:20px;
+  }
+  .toast{
+    position:fixed;bottom:78px;left:50%;transform:translateX(-50%);background:var(--navy-dark);color:#fff;
+    padding:10px 18px;border-radius:8px;font-size:12.5px;opacity:0;transition:opacity .25s;z-index:60;
+    pointer-events:none;
+  }
+  .toast.show{opacity:1;}
+</style>
+
+<!-- docxtemplater + pizzip: dipakai untuk mengisi template Word (.docx) dan mendownloadnya
+     LANGSUNG di browser tanpa server sama sekali. Kalau salah satu gagal load, pindahkan
+     ke CDN lain seperti cdn.jsdelivr.net -->
+<script src="https://cdn.jsdelivr.net/npm/pizzip@3.2.0/dist/pizzip.min.js"></script>
+<script src="https://cdn.jsdelivr.net/gh/open-xml-templating/docxtemplater-build@master/build/docxtemplater-latest.min.js"></script>
+<!-- docx-preview + jszip: dipakai khusus untuk fitur "Download PDF" - merender docx jadi
+     tampilan preview di tab baru, lalu memicu dialog Print browser (pilih "Save as PDF" di situ) -->
+<script src="https://cdn.jsdelivr.net/npm/jszip@3.10.1/dist/jszip.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/docx-preview@0.4.0/dist/docx-preview.min.js"></script>
+</head>
+<body>
+
+<!-- LOGIN GATE -->
+<div id="login_overlay" style="min-height:100vh; display:flex; align-items:center; justify-content:center; background:linear-gradient(135deg, #EAF0FB 0%, #F5F7FC 60%, #EDE9FB 100%); padding:20px;">
+  <div style="width:100%; max-width:400px; background:#fff; border:1px solid var(--line); border-radius:16px; padding:36px 32px; box-shadow:0 20px 50px rgba(20,30,60,.12);">
+    <div style="display:flex; flex-direction:column; align-items:center; text-align:center; margin-bottom:26px;">
+      <div style="width:56px; height:56px; border-radius:14px; background:var(--navy); color:#fff; display:flex; align-items:center; justify-content:center; font-weight:800; font-size:18px; letter-spacing:.5px; margin-bottom:14px; box-shadow:0 8px 16px rgba(13,54,133,.25);">CSE</div>
+      <div style="font-weight:700; font-size:17px; color:var(--navy-dark); line-height:1.3;">Generator Catatan<br>Pengemasan Batch</div>
+      <div style="font-size:12.5px; color:var(--muted); margin-top:6px;">Masuk untuk mulai</div>
+    </div>
+    <input type="hidden" id="login_webapp_url" value="https://script.google.com/macros/s/AKfycbwP34hHQWEHWqUJllNLvq6TL0gxktAcIsBAphxrLW7h4i5-ZhSTSvcwOb-B6OZz5EJe/exec">
+    <div class="field" style="margin-bottom:16px;">
+      <label style="font-size:12.5px;">Username</label>
+      <input type="text" id="login_username" autocomplete="username" style="padding:11px 14px; font-size:14px;">
+    </div>
+    <div class="field" style="margin-bottom:22px;">
+      <label style="font-size:12.5px;">Password</label>
+      <input type="password" id="login_password" autocomplete="current-password" style="padding:11px 14px; font-size:14px;">
+    </div>
+    <button class="generate-btn" id="login_btn" type="button" style="width:100%; padding:12px; font-size:14px; border-radius:9px;">Masuk</button>
+    <div id="login_error" style="color:#C0392B; font-size:12.5px; margin-top:12px; text-align:center; display:none;"></div>
+  </div>
+</div>
+
+<div id="app_content" style="display:none;">
+
+<div class="topbar">
+  <div class="badge">CSE</div>
+  <div>
+    <h1>Generator Catatan Pengemasan Batch</h1>
+    <p>CSE/RD/PPK/026/FR.01 &middot; Kode &amp; Nama Kemasan otomatis dari sheet "Data Untuk CPB"</p>
+  </div>
+</div>
+
+<div class="wrap">
+
+  <!-- 0. Sumber Data -->
+  <div class="section" style="border-color:#0D3685;">
+    <div class="section-head"><div class="num">0</div><h2>Sumber Data (Google Spreadsheet)</h2><span class="hint">terhubung otomatis dari login</span></div>
+    <div class="section-body">
+      <input type="hidden" id="webapp_url">
+      <div style="display:flex; gap:10px; align-items:center;">
+        <button class="btn-add" id="load_data_btn" type="button">Sync Data dari Spreadsheet</button>
+        <span id="data_source_status" style="font-size:12px; color:var(--muted);">Belum dimuat - memakai data bawaan (snapshot terakhir).</span>
+      </div>
+      <div style="margin-top:10px;">
+        <a href="#" id="toggle_url_link" style="font-size:11.5px; color:var(--muted);">tampilkan Web App URL (untuk keperluan admin)</a>
+        <div id="url_reveal_box" style="display:none; margin-top:8px;">
+          <input type="text" id="webapp_url_display" readonly style="font-size:11.5px;">
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- 1. Dokumen -->
+  <div class="section">
+    <div class="section-head"><div class="num">1</div><h2>Informasi Dokumen</h2></div>
+    <div class="section-body">
+      <div class="grid">
+        <div class="field">
+          <label class="req">No. Dokumen</label>
+          <input type="text" id="doc_no" value="CSE/RD/PPK/026/FR.01">
+        </div>
+        <div class="field">
+          <label class="req">Tanggal Berlaku</label>
+          <input type="date" id="doc_date">
+        </div>
+        <div class="field">
+          <label>Menggantikan No. Dokumen</label>
+          <input type="text" id="prev_doc_no" placeholder="- (isi jika ada)">
+        </div>
+        <div class="field">
+          <label>Tanggal Menggantikan</label>
+          <input type="text" id="prev_doc_date" placeholder="- (isi jika ada)">
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- 2. Identitas Produk -->
+  <div class="section">
+    <div class="section-head"><div class="num">2</div><h2>Identitas Produk</h2></div>
+    <div class="section-body">
+      <div class="field full" style="margin-bottom:12px;">
+        <label>Nama Produk (cari dari sheet "Data Untuk CPB")</label>
+        <div class="search-wrap">
+          <input type="text" id="product_search" placeholder="Ketik untuk mencari nama produk...">
+          <div class="search-results" id="product_results"></div>
+        </div>
+        <div class="komponen-preview" id="komponen_preview">Belum ada produk dipilih.</div>
+      </div>
+      <div class="grid3">
+        <div class="field"><label>Kode Produk</label><input type="text" id="product_code"></div>
+        <div class="field"><label>Nomor Batch</label><input type="text" id="batch_no"></div>
+        <div class="field"><label class="req">Bentuk Sediaan</label><input type="text" id="dosage_form" placeholder="Cream / Gel / Lotion / Serum ..."></div>
+      </div>
+      <div class="grid3" style="margin-top:12px;">
+        <div class="field"><label class="req">Besar Batch (kg)</label><input type="text" id="batch_kg" placeholder="cth. 40 kg"></div>
+        <div class="field"><label class="req">Besar Batch (pcs)</label><input type="text" id="batch_pcs" placeholder="cth. 1350 pcs"></div>
+        <div class="field"><label class="req">Jenis Kemasan Primer</label><input type="text" id="primary_pack_type" placeholder="Tube / Botol / Pot ..."></div>
+      </div>
+      <div class="grid3" style="margin-top:12px;">
+        <div class="field"><label>Tanggal Kedaluwarsa</label><input type="date" id="expiry_date"></div>
+        <div class="field"><label>Tanggal Mulai</label><input type="date" id="start_date"></div>
+        <div class="field"><label>Tanggal Selesai</label><input type="date" id="end_date"></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- 3. Identitas Kelengkapan Kemasan -->
+  <div class="section">
+    <div class="section-head"><div class="num">3</div><h2>Identitas Kelengkapan Kemasan</h2><span class="hint">Kode &amp; Nama Kemasan otomatis dari sheet "Data Untuk CPB"</span></div>
+    <div class="section-body">
+      <div class="grid3">
+        <div class="field"><label>Tanggal</label><input type="date" id="prep_date"></div>
+        <div class="field"><label>Ruangan</label><input type="text" id="prep_room"></div>
+        <div class="field"><label>Suhu</label><input type="text" id="prep_temp" placeholder="cth. 22-25°C"></div>
+      </div>
+      <table class="kemasan-table" id="kemasan_table" style="margin-top:14px;">
+        <thead><tr><th style="width:30%">Kode Kemasan</th><th>Nama Kemasan (dari sheet "Data Untuk CPB")</th></tr></thead>
+        <tbody id="kemasan_tbody">
+          <tr><td colspan="2" class="kemasan-empty">Pilih produk terlebih dahulu di atas.</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <!-- 4. Peralatan -->
+  <div class="section">
+    <div class="section-head"><div class="num">4</div><h2>Peralatan</h2><span class="hint">pilih dari daftar, atau tambah manual kalau belum ada</span></div>
+    <div class="section-body">
+      <label style="margin-bottom:8px;">Pilih Peralatan</label>
+      <div id="machine_checklist" style="border:1px solid var(--line); border-radius:8px; padding:10px 12px; max-height:220px; overflow-y:auto; margin-bottom:14px;">
+        <span style="font-size:12.5px; color:var(--muted); font-style:italic;">Daftar peralatan belum dimuat - klik "Sync Data dari Spreadsheet" di section 0.</span>
+      </div>
+      <label style="margin-bottom:8px;">Tambahan Manual (kalau belum ada di daftar)</label>
+      <div id="machine_list"></div>
+      <button class="btn-add" id="add_machine">+ Tambah Manual</button>
+    </div>
+  </div>
+
+  <!-- 5. Kodifikasi Kemasan -->
+  <div class="section">
+    <div class="section-head"><div class="num">5</div><h2>Kodifikasi Kemasan</h2></div>
+    <div class="section-body">
+      <div class="grid3">
+        <div class="field"><label>Tanggal</label><input type="date" id="kodifikasi_date"></div>
+        <div class="field"><label>Contoh Format No. Batch</label><input type="text" id="format_batch" placeholder="cth. D26001A"></div>
+        <div class="field"><label>Contoh Format Tanggal Kedaluwarsa</label><input type="text" id="format_exp" placeholder="cth. EXP.0226"></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- 6. Prosedur Primer -->
+  <div class="section">
+    <div class="section-head"><div class="num">6</div><h2>Prosedur Pengemasan Primer (Filling)</h2></div>
+    <div class="section-body">
+      <div class="grid3">
+        <div class="field"><label>Tanggal</label><input type="date" id="primer_date"></div>
+        <div class="field"><label>Ruangan</label><input type="text" id="primer_room"></div>
+        <div class="field"><label>Suhu</label><input type="text" id="primer_temp"></div>
+      </div>
+      <div class="grid" style="margin-top:12px;">
+        <div class="field"><label>Nama Kemasan Primer (untuk penimbangan kosong)</label><input type="text" id="primary_container_name" placeholder="cth. tube"></div>
+        <div class="field"><label>Standar Berat Kemasan Kosong</label><input type="text" id="empty_weight_std" placeholder="cth. 7 ± 1 g"></div>
+      </div>
+      <div class="field" style="margin-top:12px;">
+        <label>Standar Berat Isi</label>
+        <input type="text" id="fill_weight_std" placeholder="cth. 30 ± 1 g">
+      </div>
+      <div class="checkline" style="margin-top:14px;">
+        <input type="checkbox" id="flag_leaktest" checked>
+        <div><span class="lbl">Test Kebocoran (Vacuum Leak Test)</span><span class="sub">langkah opsional - nomor langkah setelahnya otomatis menyesuaikan kalau dilewati</span></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- 7. Prosedur Sekunder -->
+  <div class="section">
+    <div class="section-head"><div class="num">7</div><h2>Prosedur Pengemasan Sekunder (Packing)</h2><span class="hint">Checklist otomatis dari komponen produk, bisa disesuaikan</span></div>
+    <div class="section-body">
+      <div class="grid3">
+        <div class="field"><label>Tanggal</label><input type="date" id="secondary_date"></div>
+        <div class="field"><label>Ruangan</label><input type="text" id="secondary_room"></div>
+        <div class="field"><label>Suhu</label><input type="text" id="secondary_temp"></div>
+      </div>
+
+      <div style="margin-top:14px;">
+        <div style="padding:10px 0; border-bottom:1px solid #F0F2F8;">
+          <div style="font-weight:600; font-size:13px; color:var(--ink); margin-bottom:2px;">Batch code &amp; tanggal kedaluwarsa dicetak pada:</div>
+          <div style="font-size:11.5px; color:var(--muted); margin-bottom:8px;">langkah pemberian kode batch - pilih sesuai kemasan produk ini</div>
+          <select id="flag_batchcode_scope">
+            <option value="both" selected>Kemasan Primer &amp; Sekunder</option>
+            <option value="primary_only">Hanya Kemasan Primer</option>
+            <option value="secondary_only">Hanya Kemasan Sekunder</option>
+            <option value="none">Tidak ada (dilewati)</option>
+          </select>
+          <div id="step_batchcode_wrap" style="margin-top:10px; display:none;">
+            <label style="font-size:11.5px;">Teks langkah (bisa diedit bebas)</label>
+            <textarea id="step_batchcode_text" rows="2" style="width:100%; font-family:inherit; font-size:13px; padding:8px 10px; border:1px solid var(--line); border-radius:7px;"></textarea>
+          </div>
+        </div>
+        <div class="checkline">
+          <input type="checkbox" id="flag_stiker">
+          <div style="flex:1;">
+            <span class="lbl">Stiker Hologram &amp; Stiker Bening</span><span class="sub" id="sub_stiker">terdeteksi dari komponen produk</span>
+            <div id="step_stiker_wrap" style="margin-top:8px; display:none;">
+              <label style="font-size:11.5px;">Teks langkah (bisa diedit bebas)</label>
+              <textarea id="step_stiker_text" rows="2" style="width:100%; font-family:inherit; font-size:13px; padding:8px 10px; border:1px solid var(--line); border-radius:7px;"></textarea>
+            </div>
+          </div>
+        </div>
+        <div class="checkline">
+          <input type="checkbox" id="flag_shrink">
+          <div style="flex:1;">
+            <span class="lbl">Shrink produk</span><span class="sub" id="sub_shrink">terdeteksi dari komponen produk</span>
+            <div id="step_shrink_wrap" style="margin-top:8px; display:none;">
+              <label style="font-size:11.5px;">Teks langkah (bisa diedit bebas)</label>
+              <textarea id="step_shrink_text" rows="2" style="width:100%; font-family:inherit; font-size:13px; padding:8px 10px; border:1px solid var(--line); border-radius:7px;"></textarea>
+            </div>
+          </div>
+        </div>
+        <div class="checkline">
+          <input type="checkbox" id="flag_masterbox">
+          <div><span class="lbl">Susun ke Master Box</span><span class="sub" id="sub_masterbox">terdeteksi dari komponen produk</span></div>
+        </div>
+      </div>
+
+      <div id="masterbox_detail" style="display:none;margin-top:14px;padding:12px;background:var(--navy-light);border-radius:8px;">
+        <label style="margin-bottom:8px;">Susunan Master Box (panjang x lebar x tinggi) &amp; total isi</label>
+        <div class="grid3">
+          <input type="text" id="mb_p" placeholder="Panjang">
+          <input type="text" id="mb_l" placeholder="Lebar">
+          <input type="text" id="mb_t" placeholder="Tinggi">
+        </div>
+        <div class="field" style="margin-top:10px;"><label>Jumlah total / master box</label><input type="text" id="mb_total" placeholder="cth. 60"></div>
+        <div class="grid3" style="margin-top:10px;">
+          <div class="field"><label>Standar Berat Master Box</label><input type="text" id="mb_std" placeholder="cth. 3500 g"></div>
+          <div class="field"><label>Batas Bawah</label><input type="text" id="mb_low" placeholder="g"></div>
+          <div class="field"><label>Batas Atas</label><input type="text" id="mb_high" placeholder="g"></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- 8. Nama file -->
+  <div class="section">
+    <div class="section-head"><div class="num">8</div><h2>Nama File Output</h2></div>
+    <div class="section-body">
+      <label>Rename file sebelum diunduh</label>
+      <input type="text" id="output_filename" placeholder="Akan terisi otomatis setelah produk dipilih">
+    </div>
+  </div>
+
+  <!-- 9. Riwayat Generate (Google Sheets) -->
+  <div class="section">
+    <div class="section-head"><div class="num">9</div><h2>Riwayat Generate (Google Sheets)</h2><span class="hint">otomatis</span></div>
+    <div class="section-body">
+      <p style="margin:0; font-size:13px; color:var(--muted); line-height:1.5;">
+        Setiap klik "Generate Dokumen", datanya otomatis tercatat sebagai baris baru di sheet
+        "Riwayat Generate" (lihat tabel di bawah). File Word (.docx) baru dibuat &amp; didownload
+        saat Anda klik tombol "Download Word" di baris yang diinginkan - dibuat langsung di
+        browser Anda, tidak disimpan di Google Drive.
+      </p>
+    </div>
+  </div>
+
+  <!-- 10. Tabel Riwayat Generate -->
+  <div class="section">
+    <div class="section-head">
+      <div class="num">10</div><h2>Tabel Riwayat Generate</h2>
+      <span class="hint">review, edit, dan duplikat langsung di sini</span>
+    </div>
+    <div class="section-body">
+      <div style="display:flex; gap:10px; align-items:center; margin-bottom:12px;">
+        <button class="btn-add" id="refresh_history_btn" type="button">Refresh Riwayat</button>
+        <span id="history_status" style="font-size:12px; color:var(--muted);">Belum dimuat.</span>
+      </div>
+      <div style="overflow-x:auto; max-height:480px; overflow-y:auto; border:1px solid var(--line); border-radius:8px;">
+        <table class="kemasan-table" id="history_table" style="min-width:1250px; margin-top:0;">
+          <thead>
+            <tr>
+              <th style="width:50px;">No</th>
+              <th style="width:130px;">Timestamp</th>
+              <th style="width:200px;">Nama Produk</th>
+              <th style="width:100px;">Kode Produk</th>
+              <th style="width:100px;">No Batch</th>
+              <th style="width:90px;">Batch (kg)</th>
+              <th style="width:90px;">Batch (pcs)</th>
+              <th style="width:110px;">Tgl Mulai</th>
+              <th style="width:110px;">Tgl Selesai</th>
+              <th style="width:180px;">Nama File</th>
+              <th style="width:90px;">Status</th>
+              <th style="width:150px;">Catatan</th>
+              <th style="width:130px;">File</th>
+              <th style="width:140px;">Aksi</th>
+            </tr>
+          </thead>
+          <tbody id="history_tbody">
+            <tr><td colspan="14" class="kemasan-empty">Klik "Refresh Riwayat" untuk memuat data.</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+
+</div>
+
+<div class="footer-bar">
+  <div class="inner">
+    <div class="filename-preview">File: <b id="filename_display">-</b></div>
+    <button class="generate-btn" id="generate_btn">Generate Dokumen →</button>
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+</div>
+<!-- /app_content -->
+
+<script>
+// Template Word (.docx) ditempel di sini sebagai base64 - tidak perlu file terpisah.
+const TEMPLATE_DOCX_BASE64 = "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";
+const PRODUCTS = [{"nama": "DERMA EXPRESS Acne Spot Treatment with Willow Bark Extract", "kemasan": [{"kode": "", "nama": "Packaging Botol Coklat 60 ml"}, {"kode": "", "nama": "Inner botol"}, {"kode": "", "nama": "Tutup Gold"}, {"kode": "", "nama": "Sticker Botol Derma Express Acne Spot Treatment with Willow Bark Extract"}]}, {"nama": "DERMA EXPRESS Body Lotion", "kemasan": [{"kode": "", "nama": "Packaging Botol Coklat 200 ml"}, {"kode": "", "nama": "Pump"}, {"kode": "", "nama": "Sticker Botol Derma Express Body Lotion"}, {"kode": "", "nama": "Plastik Shrink"}]}, {"nama": "Derma Express Essential Oil ", "kemasan": [{"kode": "", "nama": "Packaging Botol Serum Coklat 20 ml / Repackage"}, {"kode": "", "nama": "Sticker Botol Derma Express Essential Oil"}, {"kode": "", "nama": "Plastik Shrink"}]}, {"nama": "DERMA EXPRESS Skin Refine Cleanser", "kemasan": [{"kode": "", "nama": "Packaging Botol Pump 100 ml"}, {"kode": "", "nama": "Pump"}, {"kode": "", "nama": "Tutup"}, {"kode": "", "nama": "Sticker Botol Derma Express Skin Refine Cleanser"}, {"kode": "", "nama": "Plastik Shrink"}]}, {"nama": "DERMA EXPRESS Solution Essence", "kemasan": [{"kode": "", "nama": "Packaging Botol pump 100 ml"}, {"kode": "", "nama": "Pump"}, {"kode": "", "nama": "Tutup"}, {"kode": "", "nama": "Sticker Botol Derma Express Solution Essence"}, {"kode": "", "nama": "Plastik Shrink"}]}, {"nama": "DERMA EXPRESS Toner", "kemasan": [{"kode": "", "nama": "Packaging botol 1L"}, {"kode": "", "nama": "Inner"}, {"kode": "", "nama": "Tutup"}, {"kode": "", "nama": "Sticker Botol Derma Express Toner"}]}, {"nama": "DERMAKLIN Parfume 25% For Scenting Diffuser", "kemasan": [{"kode": "", "nama": "Packaging Jerigen 5L"}, {"kode": "", "nama": "Inner"}, {"kode": "", "nama": "Tutup"}, {"kode": "", "nama": "Sticker Dermaklin Parfume 25% For Scenting Diffuser (print)"}]}, {"nama": "DERMASTER Brightening Sheet Mask", "kemasan": [{"kode": "", "nama": "Packaging Sachet DERMASTER Brightening Sheet Mask 15 ml"}]}, {"nama": "DERMASTER Calming Cream", "kemasan": [{"kode": "", "nama": "Packaging Pot Silver 10 gr"}, {"kode": "", "nama": "Tutup Silver"}, {"kode": "", "nama": "Sticker Packaging DERMASTER Calming Cream"}]}, {"nama": "DERMASTER Calming Essence", "kemasan": [{"kode": "", "nama": "Packaging Botol 100 ml"}, {"kode": "", "nama": "Tutup"}, {"kode": "", "nama": "Inner Flip Top"}, {"kode": "", "nama": "Sticker Botol DERMASTER Calming Essence"}, {"kode": "", "nama": "Inner Box"}, {"kode": "", "nama": "Sticker N/A DERMASTER Calming Essence"}]}, {"nama": "DERMASTER Cool Soothing Gel ", "kemasan": [{"kode": "", "nama": "Packaging Jerigen 5L"}]}, {"nama": "Dermaster Handsanitizer Blue", "kemasan": [{"kode": "", "nama": "Packaging Jerigen 5L"}, {"kode": "", "nama": "Sticker Packaging Dermaster Handsanitizer Blue"}]}, {"nama": "DERMASTER Hydrating Sheet Mask to Soothe Acne-Prone Skin", "kemasan": [{"kode": "", "nama": "Packaging Sachet Dexskin by Derma Express Hydrating Sheet Mask to Soothe Acne-Prone Skin 15 ml"}]}, {"nama": "DERMASTER Massage Oil", "kemasan": [{"kode": "", "nama": "Packaging Botol Serum Coklat 20 ml / Repackage"}, {"kode": "", "nama": "Sticker Botol DERMASTER Massage Oil"}, {"kode": "", "nama": "Plastik Shrink"}]}, {"nama": "DERMASTER Milk Face Cleanser", "kemasan": [{"kode": "", "nama": "Packaging Botol TC 100ml"}, {"kode": "", "nama": "Tutup List Silver"}, {"kode": "", "nama": "Sticker Botol DERMASTER Milk Face Cleanser"}, {"kode": "", "nama": "Plastik Shrink"}]}, {"nama": "DERMASTER Smoothing Scrub", "kemasan": [{"kode": "", "nama": "Packaging Pot Putih 1000gr"}, {"kode": "", "nama": "Tutup Putih"}, {"kode": "", "nama": "Sticker Packaging Dermaster Smoothing Scrub"}]}, {"nama": "DERMASTER Sunscreen Hybrid Gel with Ceramide", "kemasan": [{"kode": "", "nama": "Packaging Pot Coklat 30 gr"}, {"kode": "", "nama": "Tutup"}, {"kode": "", "nama": "Sticker Dermaster Sunscreen Hybrid Gel with Ceramide"}, {"kode": "", "nama": "Plastik Shrink"}]}, {"nama": "DEXBABY 2 in 1 Head to Toe", "kemasan": [{"kode": "", "nama": "Packaging botol 200 ml"}, {"kode": "", "nama": "Tutup"}, {"kode": "", "nama": "Sticker Botol Debaby 2 in 1 Head To Toe"}, {"kode": "", "nama": "Inner Box"}, {"kode": "", "nama": "Sticker Hologram Dexbaby dan Sticker bulat bening"}]}, {"nama": "DEXBABY Body Lotion", "kemasan": [{"kode": "", "nama": "Packaging Botol 200 ml"}, {"kode": "", "nama": "Tutup"}, {"kode": "", "nama": "Sticker Botol Dexbaby Body Lotion"}, {"kode": "", "nama": "Inner Box"}, {"kode": "", "nama": "Sticker Hologram Dexbaby dan Sticker Bulat Bening"}]}, {"nama": "DEXBABY Hair Serum", "kemasan": [{"kode": "", "nama": "Packaging Botol 100 ml"}, {"kode": "", "nama": "Tutup Putih"}, {"kode": "", "nama": "Inner Fliptop"}, {"kode": "", "nama": "Sticker Botol Dexbaby Hair Serum"}, {"kode": "", "nama": "Inner Box"}, {"kode": "", "nama": "Sticker Hologram Dexbaby dan Sticker Bulat Bening"}]}, {"nama": "DEXBABY Moisturizing Face Cream", "kemasan": [{"kode": "", "nama": "Packaging Tube 85 ml"}, {"kode": "", "nama": "Tutup"}, {"kode": "", "nama": "Inner Box"}, {"kode": "", "nama": "Sticker Hologram Dexbaby dan Sticker Bening Bulat"}]}, {"nama": "DEXSKIN Acne & Oil Control Gel", "kemasan": [{"kode": "", "nama": "Packaging pot jar 30 gr merah Dexskin Acne & Oil Control Gel"}, {"kode": "", "nama": "Inner jar"}, {"kode": "", "nama": "Jar Cap"}, {"kode": "", "nama": "Sticker Ingredients Dexskin Acne & Oil Control Gel"}, {"kode": "", "nama": "Inner Box Dexskin Acne & Oil Control Gel"}, {"kode": "", "nama": "Hologram Dexskin dan Sticker Bulat Bening"}]}, {"nama": "DEXSKIN Acne Sheet Mask with Centella Asiatica Extract", "kemasan": [{"kode": "AS", "nama": "Packaging sachet orange Netto 15 ml"}]}, {"nama": "DEXSKIN BY DERMA EXPRESS Acne Basic Cream", "kemasan": [{"kode": "", "nama": "Packaging Pot Lulur 100 gr"}, {"kode": "", "nama": "Sticker Dexskin by Derma Express Acne Basic Cream 85 gr"}, {"kode": "", "nama": "Plastik Shrink"}]}, {"nama": "DEXSKIN BY DERMA EXPRESS Acne Serum", "kemasan": [{"kode": "", "nama": "Packaging Botol Coklat 20 ml"}, {"kode": "", "nama": "Pipet kaca"}, {"kode": "", "nama": "Sticker Botol Derma Express Acne Serum"}, {"kode": "", "nama": "Plastik Shrink"}]}, {"nama": "DEXSKIN BY DERMA EXPRESS Acne Skin Refine Cleanser", "kemasan": [{"kode": "", "nama": "Packaging Botol pump 100 ml"}, {"kode": "", "nama": "Pump"}, {"kode": "", "nama": "Tutup"}, {"kode": "", "nama": "Plastik Shirnk (kebutuhan gudang online)"}, {"kode": "", "nama": "Inner Box Dexskin by Derma Express Acne Skin Refine Cleanser (kebutuhan klinik)"}, {"kode": "", "nama": "Sticker Hologram Dexskin dan Sticker Bulat Bening"}]}, {"nama": "DEXSKIN BY DERMA EXPRESS Acne Solution Toner", "kemasan": [{"kode": "", "nama": "Packaging Botol Pump Toner 100ml Removal"}, {"kode": "", "nama": "Tutup Removal"}, {"kode": "", "nama": "Sticker Botol Dexskin by Derma Express Acne Solution Toner"}, {"kode": "", "nama": "Plastik Shrink"}]}, {"nama": "DEXSKIN BY DERMA EXPRESS Acne Spot Clear Away", "kemasan": [{"kode": "", "nama": "Packaging Tube putih 10 ml"}, {"kode": "", "nama": "Inner"}, {"kode": "", "nama": "Tutup"}, {"kode": "", "nama": "Sticker tube Dexskin by Derma Express Acne Spot Clear Away (ada Halal)"}, {"kode": "", "nama": "Inner Box Dexskin by Derma Express Acne Spot Clear Away"}, {"kode": "", "nama": "Sticker Hologram Dexskin dan Sticker Bulat Bening"}]}, {"nama": "DEXSKIN BY DERMA EXPRESS Brightening Basic Cream", "kemasan": [{"kode": "", "nama": "Packaging Pot Lulur 100 gr"}, {"kode": "", "nama": "Sticker Dexskin by Derma Express Brightening Basic Cream 85 gr"}, {"kode": "", "nama": "Plastik Shrink"}]}, {"nama": "DEXSKIN BY DERMA EXPRESS British Pear & Freesia Handsoap", "kemasan": [{"kode": "", "nama": "Packaging Jerigen 5L & 20L"}, {"kode": "", "nama": "Sticker Packaging DEXSKIN BY DERMA EXPRESS British Pear & Freesia Handsoap"}]}, {"nama": "DEXSKIN BY DERMA EXPRESS British Pear & Freesia Shower Gel", "kemasan": [{"kode": "", "nama": "Packaging Jerigen 5L & 20L"}, {"kode": "", "nama": "Sticker Packaging DEXSKIN BY DERMA EXPRESS British Pear & Freesia Shower Gel"}]}, {"nama": "DEXSKIN BY DERMA EXPRESS Calming Emulsion", "kemasan": [{"kode": "", "nama": "Packaging Tube Dexskin by Derma Express Calming Emulsion 30 gr"}, {"kode": "", "nama": "Inner Box Dexskin by Derma Express Calming Emulsion 30 gr"}, {"kode": "", "nama": "Sticker Hologram Dexskin dan Stiker Bulat Bening"}, {"kode": "", "nama": "Plastik Shrink"}]}, {"nama": "DEXSKIN BY DERMA EXPRESS Crystal Clear Gel", "kemasan": [{"kode": "", "nama": "Packaging Jerigen 5L"}, {"kode": "", "nama": "Sticker Dexskin by Derma Express Crystal Clear Gel"}]}, {"nama": "DEXSKIN BY DERMA EXPRESS Cysteamine Booster Night Cream", "kemasan": [{"kode": "", "nama": "Packaging Pot Jar 30 gr Biru Dexskin by Derma Express Cysteamine Booster Night Cream"}, {"kode": "", "nama": "Inner"}, {"kode": "", "nama": "Jar Cap"}, {"kode": "", "nama": "Sticker Ingredients Dexskin by Derma Express Cysteamine Booster Night Cream"}, {"kode": "", "nama": "Inner Box Dexskin by Derma Express Cysteamine Booster Night Cream"}, {"kode": "", "nama": "Sticker Hologram Dexskin dan Sticker Bulat Bening"}]}, {"nama": "DEXSKIN BY DERMA EXPRESS Daylight Whitening Serum with Niacinamide", "kemasan": [{"kode": "", "nama": "Packaging Botol Serum Bening 20 ml"}, {"kode": "", "nama": "Tutup Twistlock Putih"}, {"kode": "", "nama": "Sticker Botol Dexskin by Derma Express Daylight Whitening Serum with Niacinamide"}, {"kode": "", "nama": "Inner Box Dexskin by Derma Express Daylight Whitening Serum with Niacinamide"}, {"kode": "", "nama": "Sticker Hologram Dexskin dan Sticker Bulat Bening"}]}, {"nama": "Dexskin by Derma Express Eco Pearl Freesia Conditioner ", "kemasan": [{"kode": "", "nama": "Packaging Jerigen 5L & 20L"}, {"kode": "", "nama": "Sticker Packaging Dexskin by Derma Express Eco Pearl Freesia Conditioner"}]}, {"nama": "DEXSKIN BY DERMA EXPRESS Exfoliating solution with Succinic Acid & Glycolic Acid", "kemasan": [{"kode": "", "nama": "Packaging Botol Serum Bening 20 ml"}, {"kode": "", "nama": "Tutup Twistlock Putih"}, {"kode": "", "nama": "Sticker BotolDEXSKIN BY DERMA EXPRESS Exfoliating solution with Succinic Acid & Glycolic Acid"}, {"kode": "", "nama": "Inner Box DEXSKIN BY DERMA EXPRESS Exfoliating solution with Succinic Acid & Glycolic Acid"}, {"kode": "", "nama": "Sticker Hologram Dexskin dan Sticker Bulat Bening"}]}, {"nama": "DEXSKIN BY DERMA EXPRESS Extra Clear Make Up Remover", "kemasan": [{"kode": "", "nama": "Packaging botol toner slim fat 100 ml"}, {"kode": "", "nama": "Tutup"}, {"kode": "", "nama": "Sticker Botol Dexskin by Derma Express Extra Clear Make Up Remover"}, {"kode": "", "nama": "Plastik Shrink"}]}, {"nama": "DEXSKIN BY DERMA EXPRESS Face Massage Cream", "kemasan": [{"kode": "", "nama": "Packaging Pot 500 gr"}, {"kode": "", "nama": "Inner"}, {"kode": "", "nama": "Tutup"}, {"kode": "", "nama": "Sticker Dexskin by Derma Express Face Massage Cream"}, {"kode": "", "nama": "Solasi (Segelling)"}]}, {"nama": "DEXSKIN BY DERMA EXPRESS Face Wash For Men Gentle Cleanser", "kemasan": [{"kode": "", "nama": "Packaging Botol Facial Wash 100 ml"}, {"kode": "", "nama": "Sticker Botol Dexskin by Derma Express Face Wash For Men Gentle Cleanser"}, {"kode": "", "nama": "Plastik Shrink"}]}, {"nama": "DEXSKIN BY DERMA EXPRESS Fresh Pear Freesia Handsoap", "kemasan": [{"kode": "", "nama": "Packaging Jerigen 5L"}, {"kode": "", "nama": "Sticker Packaging DEXSKIN BY DERMA EXPRESS Fresh Pear Freesia Handsoap"}]}, {"nama": "DEXSKIN BY DERMA EXPRESS Fresh Pear Freesia Shampoo", "kemasan": [{"kode": "", "nama": "Packaging Jerigen 5L & 20L"}, {"kode": "", "nama": "Sticker Packaging DEXSKIN BY DERMA EXPRESS Fresh Pear Freesia Shampoo"}]}, {"nama": "DEXSKIN BY DERMA EXPRESS Fresh Pear Freesia Shower Gel", "kemasan": [{"kode": "", "nama": "Packaging Jerigen 5L & 20L"}, {"kode": "", "nama": "Sticker Packaging DEXSKIN BY DERMA EXPRESS Fresh Pear Freesia Shower Gel"}]}, {"nama": "DEXSKIN BY DERMA EXPRESS Hair Oil", "kemasan": [{"kode": "", "nama": "Packaging Botol Coklat Amber 30 ml"}, {"kode": "", "nama": "Pipet"}, {"kode": "", "nama": "Sticker Botol Dexskin by Derma Express Hair Oil"}, {"kode": "", "nama": "Inner Box Dexskin by Derma Express Hair Oil"}, {"kode": "", "nama": "Sticker Hologram Dexskin dan Sticker Bulat Bening"}]}, {"nama": "DEXSKIN BY DERMA EXPRESS Hair Serum", "kemasan": [{"kode": "", "nama": "Packaging Botol 100 ml"}, {"kode": "", "nama": "Tutup"}, {"kode": "", "nama": "Sticker Halal Botol DEXSKIN Hair Serum"}, {"kode": "", "nama": "Inner Box"}, {"kode": "", "nama": "Sticker Halal Innerbox DEXSKIN Hair Serum"}, {"kode": "", "nama": "Sticker Hologram Dexskin dan Sticker Bening Bulat"}]}, {"nama": "DEXSKIN BY DERMA EXPRESS handsoap economy with lemongrass fragrance", "kemasan": [{"kode": "", "nama": "Packaging Jerigen 5L"}, {"kode": "", "nama": "Sticker Packaging DEXSKIN BY DERMA EXPRESS handsoap economy with lemongrass fragrance"}]}, {"nama": "DEXSKIN BY DERMA EXPRESS Hydrating Essence For Men", "kemasan": [{"kode": "", "nama": "Packaging Botol Pump 70 ml"}, {"kode": "", "nama": "Sticker Botol Dexskin by Derma Express Hydrating Essence For Men"}, {"kode": "", "nama": "Plastik Shrink"}]}, {"nama": "DEXSKIN BY DERMA EXPRESS Invisible Moon Brightening Cream", "kemasan": [{"kode": "", "nama": "Packaging Tube Dexskin by Derma Express Invisible Moon Brightening Cream 30 gr"}, {"kode": "", "nama": "Inner Box Dexskin by Derma Express Invisible Moon Brightening Cream 30 gr"}, {"kode": "", "nama": "Sticker Hologram Dexskin dan Stiker Bulat Bening"}, {"kode": "", "nama": "Plastik Shrink"}]}, {"nama": "DEXSKIN BY DERMA EXPRESS Jeju Hydra Solution", "kemasan": [{"kode": "", "nama": "Packaging Botol pump 100 ml"}, {"kode": "", "nama": "Pump"}, {"kode": "", "nama": "Tutup"}, {"kode": "", "nama": "Sticker Botol Dexskin by Derma Express Jeju Hydra Solution"}, {"kode": "", "nama": "Plastik Shrink"}]}, {"nama": "DEXSKIN BY DERMA EXPRESS Light Yellow Freesia Shampoo", "kemasan": [{"kode": "", "nama": "Packaging Jerigen 5L & 20L"}, {"kode": "", "nama": "Sticker Packaging DEXSKIN BY DERMA EXPRESS Light Yellow Freesia Shampoo"}]}, {"nama": "DEXSKIN BY DERMA EXPRESS Midnight Glow Brightening Serum with Chromabright", "kemasan": [{"kode": "", "nama": "Packaging Botol Serum Doff Putih 20 ml"}, {"kode": "", "nama": "Tutup Twistlock Putih"}, {"kode": "", "nama": "Sticker Botol Dexskin by Derma Express Midnight Glow Brightening Serum with Chromabright"}, {"kode": "", "nama": "Inner Box Dexskin by Derma Express Midnight Glow Brightening Serum with Chromabright"}, {"kode": "", "nama": "Stiker Hologram Dexskin dan Sticker Bening"}]}, {"nama": "DEXSKIN BY DERMA EXPRESS Milky Way Soothing Cleanser with Sunflower Seed Oil", "kemasan": [{"kode": "", "nama": "Packaging Botol Pump 100 ml"}, {"kode": "", "nama": "Pump"}, {"kode": "", "nama": "Tutup"}, {"kode": "", "nama": "Sticker Botol Dexskin by Derma Express Milky Way Soothing Cleanser"}, {"kode": "", "nama": "Plastik Shrink (kebutuhan gudang online)"}, {"kode": "", "nama": "Inner Box DEXSKIN BY DERMA EXPRESS Milky Way Soothing Cleanser with Sunflower Seed Oil (kebutuhan klinik)"}, {"kode": "", "nama": "Sticker Hologram Dexskin dan Sticker Bulat Bening"}]}, {"nama": "DEXSKIN BY DERMA EXPRESS Moisturizing Cream", "kemasan": [{"kode": "", "nama": "Packaging Pot Lulur 100 gr"}, {"kode": "", "nama": "Sticker Dexskin by Derma Express Moisturizing Cream 85 gr"}, {"kode": "", "nama": "Plastik Shrink"}]}, {"nama": "DEXSKIN BY DERMA EXPRESS Neck Firming Retinol Cream", "kemasan": [{"kode": "", "nama": "Packaging Pot Jar 30 gr Ungu Dexskin by Derma Express Neck Firming Retinol Cream"}, {"kode": "", "nama": "Inner"}, {"kode": "", "nama": "Jar Cap"}, {"kode": "", "nama": "Sticker Pot Jar Dexskin by Derma Express Neck Firming Retinol Cream"}, {"kode": "", "nama": "Sticker Ingredients Dexskin by Derma Express Neck Firming Retinol Cream"}, {"kode": "", "nama": "Inner Box Dexskin by Derma Express Neck Firming Retinol Cream"}, {"kode": "", "nama": "Sticker Hologram Dexskin dan Sticker Bulat Bening"}]}, {"nama": "Dexskin By Derma Express NF Premium Shampoo with Cherish Moment Fragrance", "kemasan": [{"kode": "", "nama": "Packaging Jerigen 5L"}, {"kode": "", "nama": "Sticker Packaging Dexskin By Derma Express NF Premium Shampoo with Cherish Moment Fragrance"}]}, {"nama": "DEXSKIN BY DERMA EXPRESS Niacinamide Brightening Body Lotion", "kemasan": [{"kode": "", "nama": "Packaging Botol warna biru Dexskin by Derma Express Brightening Niacinamide Body Lotion (printing)"}, {"kode": "", "nama": "Tutup Flip top"}, {"kode": "", "nama": "Inner Box Dexskin by Derma Express Brightening Niacinamide Body Lotion"}, {"kode": "", "nama": "Sticker Hologram Dexskin dan Sticker Bulat Bening"}]}, {"nama": "DEXSKIN BY DERMA EXPRESS Niacinamide Night Lotion", "kemasan": [{"kode": "", "nama": "Packaging Botol warna ungu Dexskin by Derma Express Niacinamide Night Lotion (printing)"}, {"kode": "", "nama": "Tutup pump"}, {"kode": "", "nama": "Sticker Botol set komponen NA BPOM, Barcode Batang dan Halal"}, {"kode": "", "nama": "Inner Box Dexskin by Derma Express Niacinamide Night Lotion"}, {"kode": "", "nama": "Sticker Hologram Dexskin dan Sticker Bulat Bening"}]}, {"nama": "DEXSKIN BY DERMA EXPRESS Orchid Bloom Handsoap", "kemasan": [{"kode": "", "nama": "Packaging Jerigen 5L"}, {"kode": "", "nama": "Sticker Packaging DEXSKIN BY DERMA EXPRESS Orchid Bloom Handsoap"}]}, {"nama": "Dexskin by Derma Express Orchid Conditioner", "kemasan": [{"kode": "", "nama": "Packaging Jerigen 5L & 20L"}, {"kode": "", "nama": "Sticker Packaging Dexskin by Derma Express Orchid Conditioner"}]}, {"nama": "DEXSKIN BY DERMA EXPRESS Pear Freesia Body Lotion", "kemasan": [{"kode": "", "nama": "Packaging Jerigen 5L"}, {"kode": "", "nama": "Sticker Packaging DEXSKIN BY DERMA EXPRESS Pear Freesia Body Lotion"}]}, {"nama": "DEXSKIN BY DERMA EXPRESS Retinal Serum Ampuole", "kemasan": [{"kode": "", "nama": "Botol Serum Putih 20 ml"}, {"kode": "", "nama": "Tutup Pump Twislock"}, {"kode": "", "nama": "Sticker Serum Dexskin By Derma Express Retinal Serum Ampoule"}, {"kode": "", "nama": "Inner Box Retinal Serum Ampoule"}, {"kode": "", "nama": "Sticker Hologram Dexskin dan Sticker Bulat Bening"}]}, {"nama": "DEXSKIN BY DERMA EXPRESS Retinol Eye Cream", "kemasan": [{"kode": "", "nama": "Packaging Tube ungu Dexskin by Derma Express Retinol Eye Cream"}, {"kode": "", "nama": "Inner Box Dexskin by Derma Express Retinol Eye Cream"}, {"kode": "", "nama": "Sticker Hologram Dexskin dan Sticker Bulat Bening"}]}, {"nama": "DEXSKIN BY DERMA EXPRESS Rice Toner", "kemasan": [{"kode": "", "nama": "Packaging Botol Bening 100ml"}, {"kode": "", "nama": "Tutup Putih"}, {"kode": "", "nama": "Inner Flip Top"}, {"kode": "", "nama": "Sticker Botol Dexskin by Derma Express Rice Toner"}, {"kode": "", "nama": "Inner Box Dexskin by Derma Express Rice Toner"}, {"kode": "", "nama": "Sticker Hologram Derma Express dan Sticker Bulat Bening"}]}, {"nama": "DEXSKIN BY DERMA EXPRESS Sabun Cherish Moment", "kemasan": [{"kode": "", "nama": "Packaging Jerigen 5L"}, {"kode": "", "nama": "Sticker Packaging DEXSKIN BY DERMA EXPRESS Sabun Cherish Moment"}, {"kode": "", "nama": "Packaging Jerigen 5L"}, {"kode": "", "nama": "Inner"}, {"kode": "", "nama": "Tutup"}, {"kode": "", "nama": "Sticker Dexskin by Derma Express Sabun Cherish Moment (print)"}]}, {"nama": "DEXSKIN BY DERMA EXPRESS Sabun Glorious", "kemasan": [{"kode": "", "nama": "Packaging Jerigen 5L"}, {"kode": "", "nama": "Sticker Packaging DEXSKIN BY DERMA EXPRESS Sabun Glorious"}]}, {"nama": "DEXSKIN BY DERMA EXPRESS Salmon DNA Advance Skin Potion", "kemasan": [{"kode": "", "nama": "Packaging Botol Serum Pink 20 ml"}, {"kode": "", "nama": "Tutup pump nonlock pink"}, {"kode": "", "nama": "Sticker Botol Dexskin by Derma Express Salmon DNA Advance Skin Potion"}, {"kode": "", "nama": "Inner box Dexskin by Derma Express Salmon DNA Advance Skin Potion"}, {"kode": "", "nama": "Sticker Hologram Dexskin dan Sticker Bulat Bening"}]}, {"nama": "DEXSKIN BY DERMA EXPRESS Shampoo Economy with Orchid Fragrance", "kemasan": [{"kode": "", "nama": "Packaging Jerigen 5L"}, {"kode": "", "nama": "Sticker Packaging DEXSKIN BY DERMA EXPRESS Shampoo Economy with Orchid Fragrance"}]}, {"nama": "DEXSKIN BY DERMA EXPRESS Shampoo Premium with Fresh Pear Fragrance", "kemasan": [{"kode": "", "nama": "Packaging Jerigen 5L & 20L"}, {"kode": "", "nama": "Sticker Packaging DEXSKIN BY DERMA EXPRESS Shampoo Premium with Fresh Pear Fragrance"}]}, {"nama": "DEXSKIN BY DERMA EXPRESS Shower gel economy with orchid fragrance", "kemasan": [{"kode": "", "nama": "Packaging Jerigen 5L"}, {"kode": "", "nama": "Sticker Packaging DEXSKIN BY DERMA EXPRESS Shower gel economy with orchid fragrance"}]}, {"nama": "DEXSKIN BY DERMA EXPRESS Shower Gel Premium With Fresh Pear Fragrance", "kemasan": [{"kode": "", "nama": "Packaging Jerigen 5L & 20L"}, {"kode": "", "nama": "Sticker Packaging DEXSKIN BY DERMA EXPRESS Shower Gel Premium With Fresh Pear Fragrance"}]}, {"nama": "DEXSKIN BY DERMA EXPRESS Skin Barrier Protector Sleeping Mask", "kemasan": [{"kode": "", "nama": "Packaging Pot Blue Grey"}, {"kode": "", "nama": "Inner"}, {"kode": "", "nama": "Tutup"}, {"kode": "", "nama": "Sticker Dexskin by Derma Express Skin Barrier Protector Sleeping Mask"}, {"kode": "", "nama": "Plastik Shrink"}, {"kode": "", "nama": "Inner Box Dexskin by Derma Express Skin Barrier Protector Sleeping Mask (sudah tidak bisa digunakan)"}]}, {"nama": "DEXSKIN BY DERMA EXPRESS Sun Protection Cream", "kemasan": [{"kode": "", "nama": "Packaging Tube Dexskin by Derma Express Sun Protection Cream 30 gr"}, {"kode": "", "nama": "Inner Box Dexskin by Derma Express Sun Protection Cream 30 gr"}, {"kode": "", "nama": "Sticker Hologram Dexskin dan Sticker Bulat Bening"}, {"kode": "", "nama": "Plastik Shrink"}]}, {"nama": "DEXSKIN BY DERMA EXPRESS Sun Protection Cream For Men", "kemasan": [{"kode": "", "nama": "Packaging Airless 15 ml"}, {"kode": "", "nama": "Sticker Dexskin by Derma Express Sun Protection For Men"}, {"kode": "", "nama": "Plastik Shrink"}]}, {"nama": "DEXSKIN BY DERMA EXPRESS Sun Protection Cream with Niacinamide", "kemasan": [{"kode": "", "nama": "Packaging Tube Dexskin by Derma Express Sun Protection Cream with Niacinamide"}, {"kode": "", "nama": "Inner BoxDexskin by Derma Express Sun Protection Cream with Niacinamide"}, {"kode": "", "nama": "Sticker Hologram Dexskin dan Sticker Bulat Bening"}, {"kode": "", "nama": "Plastik Shrink"}]}, {"nama": "DEXSKIN BY DERMA EXPRESS Sunflower Emulsion", "kemasan": [{"kode": "", "nama": "Packaging Tube Dexskin by Derma Express Sunflower Emulsion 30 gr"}, {"kode": "", "nama": "Inner Box Dexskin by Derma Express Sunflower Emulsion 30 gr"}, {"kode": "", "nama": "Sticker Hologram Dexskin dan Stiker Bulat Bening"}, {"kode": "", "nama": "Plastik Shrink"}]}, {"nama": "DEXSKIN BY DERMA EXPRESS WhiteTen Jelly Booster", "kemasan": [{"kode": "", "nama": "Packaging pot jar 30 gr Dexskin by Derma Express Whiteten Jelly Booster"}, {"kode": "", "nama": "Inner jar"}, {"kode": "", "nama": "Jar Cap"}, {"kode": "", "nama": "Sticker Ingredients Dexskin by Derma Express Whiteten Jelly Booster"}, {"kode": "", "nama": "Inner Box Dexskin by Derma Express Whiteten Jelly Booster"}, {"kode": "", "nama": "Hologram Dexskin dan Sticker Bulat Bening"}]}, {"nama": "DEXSKIN BY DERMA EXPRESS x Kopi Kenangan Caffeine Kiss Body Butter", "kemasan": [{"kode": "", "nama": "Packaging Pot Scrub Kaca 200 ml"}, {"kode": "", "nama": "Tutup Coklat"}, {"kode": "", "nama": "Sticker Dexskin by Derma Express x Kopi Kenangan Caffeine Kiss Body Butter"}, {"kode": "", "nama": "Plastik Shrink"}]}, {"nama": "DEXSKIN BY DERMA EXPRESS x Kopi Kenangan EXpresso Sheet Mask", "kemasan": [{"kode": "", "nama": "Packaging Sachet Dexskin by Derma Express x Kopi Kenangan EXpresso Sheet Mask Netto 20 ml"}, {"kode": "", "nama": "Sticker set komponen NA BPOM, Barcode Batang dan Halal"}]}, {"nama": "DEXSKIN Fresh Lip Scrub", "kemasan": [{"kode": "", "nama": "Packaging pot 10 gr printing Dexskin Fresh Lip Scrub"}, {"kode": "", "nama": "Inner"}, {"kode": "", "nama": "Tutup"}, {"kode": "", "nama": "Inner Box Dexskin Fresh Lip Scrub (Halal ID Landscape)"}, {"kode": "", "nama": "Hologram Dexskin dan Sticker Bulat Bening"}]}, {"nama": "DEXSKIN Repair & Moisturize Soothing Gel", "kemasan": [{"kode": "A", "nama": "Packaging pot jar 30 gr hijau Dexskin Repair & Moisturize Soothing Gel"}, {"kode": "B", "nama": "Inner jar"}, {"kode": "C1", "nama": "Jar Cap"}, {"kode": "D4", "nama": "Sticker Ingredients Dexskin Repair & Moisturize Soothing Gel"}, {"kode": "", "nama": "Inner Box Dexskin Repair & Moisturize Soothing Gel"}, {"kode": "", "nama": "Hologram Dexskin dan Sticker Bulat Bening"}]}, {"nama": "DEXSKIN Whitening Sheet Mask with DNA Salmon", "kemasan": [{"kode": "", "nama": "Packaging sachet pink Netto 15 ml"}]}, {"nama": "Essential Oil No. 9", "kemasan": [{"kode": "", "nama": "Packaging Botol Serum Coklat 20 ml / Repackage"}, {"kode": "", "nama": "Sticker Botol Essential Oil No.9"}, {"kode": "", "nama": "Plastik Shrink"}]}, {"nama": "Hand Sanitizer Maha", "kemasan": [{"kode": "", "nama": "Packaging Jerigen 5L"}, {"kode": "", "nama": "Sticker Packaging Hand Sanitizer Maha"}]}, {"nama": "LANU FROM LEAVES, OIL & ROOTS Acne Cream", "kemasan": [{"kode": "", "nama": "Packaging Pot Jar 30 gr"}, {"kode": "", "nama": "Inner"}, {"kode": "", "nama": "Tutup hijau"}, {"kode": "", "nama": "Sticker Jar Lanu From Leaves, Oil & Roots Acne Cream"}, {"kode": "", "nama": "Inner Box Lanu From Leaves, Oil & Roots Acne Cream"}, {"kode": "", "nama": "Sticker Hologram Lanu dan Sticker Bulat Bening"}]}, {"nama": "LANU FROM LEAVES, OIL & ROOTS Age Defense Sunscreen Gel SPF 45", "kemasan": [{"kode": "", "nama": "Packaging Tube 45 gr"}, {"kode": "", "nama": "Tutup"}, {"kode": "", "nama": "Inner Box"}, {"kode": "", "nama": "Hologram LANU FROM LEAVES, OIL & ROOTS Age Defense Sunscreen Gel SPF 45 dan Sticker Bening Bulat"}]}, {"nama": "LANU FROM LEAVES, OIL & ROOTS Balancing Hybrid Sunscreen SPF 30", "kemasan": [{"kode": "", "nama": "Packaging Tube Lanu From Leaves, Oil & Roots Balancing Hybrid Sunscreen SPF 30"}, {"kode": "", "nama": "Inner Box Lanu From Leaves, Oil & Roots Balancing Hybrid Sunscreen SPF 30"}, {"kode": "", "nama": "Sticker Hologram Lanu dan Sticker Bulat Bening"}]}, {"nama": "LANU FROM LEAVES, OIL & ROOTS Brightening Hydracare Lotion", "kemasan": [{"kode": "", "nama": "Packaging Tube LANU FROM LEAVES, OIL & ROOTS Brightening Hydracare Lotion"}, {"kode": "", "nama": "Sticker Tube NA BPOM"}, {"kode": "", "nama": "Plastik Shrink"}]}, {"nama": "LANU FROM LEAVES, OIL & ROOTS Daily Fresh Cleanser", "kemasan": [{"kode": "", "nama": "Packaging Tube 100 gr"}, {"kode": "", "nama": "Sticker Tube NA BPOM"}, {"kode": "", "nama": "Plastik Shrink"}]}, {"nama": "LANU FROM LEAVES, OIL & ROOTS Daily Gentle Cleansing Gel", "kemasan": [{"kode": "", "nama": "Packaging Tube LANU FROM LEAVES, OIL & ROOTS Daily Gentle Cleansing Gel"}, {"kode": "", "nama": "Sticker NA BPOM"}, {"kode": "", "nama": "Plastik Shrink"}]}, {"nama": "LANU FROM LEAVES, OIL & ROOTS Dark Spot Solution", "kemasan": [{"kode": "", "nama": "Packaging Botol 30ml LANU FROM LEAVES, OIL & ROOTS Dark Spot Solution"}, {"kode": "", "nama": "Pipet"}, {"kode": "", "nama": "Gasket"}, {"kode": "", "nama": "Ring biru"}, {"kode": "", "nama": "Inner Box LANU FROM LEAVES, OIL & ROOTS Dark Spot Solution"}, {"kode": "", "nama": "Sticker Hologram Lanu dan Sticker Bulat Bening"}]}, {"nama": "LANU FROM LEAVES, OIL & ROOTS Deep Clean Essence AHA, BHA, PHA", "kemasan": [{"kode": "", "nama": "Packaging Botol Hijau LANU FROM LEAVES, OIL & ROOTS Deep Clean Essence AHA, BHA, PHA"}, {"kode": "", "nama": "Inner"}, {"kode": "", "nama": "Tutup"}, {"kode": "", "nama": "Sticker Botol LANU FROM LEAVES, OIL & ROOTS Deep Clean Essence AHA, BHA, PHA"}, {"kode": "", "nama": "Plastik Shrink"}]}, {"nama": "LANU FROM LEAVES, OIL & ROOTS Flake Off Exfoliant AHA, BHA, PHA", "kemasan": [{"kode": "", "nama": "Packaging Botol 30ml LANU FROM LEAVES, OIL & ROOTS Flake Off Exfoliant AHA, BHA, PHA"}, {"kode": "", "nama": "Pipet"}, {"kode": "", "nama": "Gasket"}, {"kode": "", "nama": "Ring biru"}, {"kode": "", "nama": "Inner Box LANU FROM LEAVES, OIL & ROOTS Flake Off Exfoliant AHA, BHA, PHA"}, {"kode": "", "nama": "Sticker Hologram Lanu dan Sticker Bulat Bening"}]}, {"nama": "LANU FROM LEAVES, OIL & ROOTS Hydra Clear Essence", "kemasan": [{"kode": "", "nama": "Packaging Botol LANU FROM LEAVES, OIL & ROOTS Hydra Clear Essence"}, {"kode": "", "nama": "Inner"}, {"kode": "", "nama": "Tutup"}, {"kode": "", "nama": "Sticker Botol LANU FROM LEAVES, OIL & ROOTS Hydra Clear Essence"}, {"kode": "", "nama": "Plastik Shrink"}]}, {"nama": "LANU FROM LEAVES, OIL & ROOTS Moisturizer AM / PM", "kemasan": [{"kode": "", "nama": "Packaging Jar 30 gr LANU FROM LEAVES, OIL & ROOTS Moisturizer AM / PM"}, {"kode": "", "nama": "Inner"}, {"kode": "", "nama": "Tutup"}, {"kode": "", "nama": "Inner Box LANU FROM LEAVES, OIL & ROOTS Moisturizer AM / PM"}, {"kode": "", "nama": "Sticker Hologram Lanu dan Sticker Bulat Bening"}]}, {"nama": "LANU FROM LEAVES, OIL & ROOTS Pop Off Acne Serum", "kemasan": [{"kode": "", "nama": "Packaging Botol 30ml LANU FROM LEAVES, OIL & ROOTS Pop Off Acne Serum"}, {"kode": "", "nama": "Pipet"}, {"kode": "", "nama": "Gasket"}, {"kode": "", "nama": "Ring hijau"}, {"kode": "", "nama": "Inner Box LANU FROM LEAVES, OIL & ROOTS Pop Off Acne Serum"}, {"kode": "", "nama": "Sticker Hologram Lanu dan Sticker Bulat Bening"}]}, {"nama": "LANU FROM LEAVES, OIL & ROOTS Pop Off Acne Spot", "kemasan": [{"kode": "", "nama": "Packaging Tube LANU FROM LEAVES, OIL & ROOTS Pop Off Acne Spot"}, {"kode": "", "nama": "Inner Box LANU FROM LEAVES, OIL & ROOTS Pop Off Acne Spot"}, {"kode": "", "nama": "Sticker Hologram Lanu dan Sticker Bulat Bening"}]}, {"nama": "LANU FROM LEAVES, OIL & ROOTS Retinol Soft Drop", "kemasan": [{"kode": "", "nama": "Packaging LANU FROM LEAVES, OIL & ROOTS Retinol Soft Drop"}, {"kode": "", "nama": "Pump"}, {"kode": "", "nama": "Tutup"}, {"kode": "", "nama": "Inner Box LANU FROM LEAVES, OIL & ROOTS Retinol Soft Drop"}, {"kode": "", "nama": "Sticker Hologram Lanu dan Sticker Bulat Bening"}]}, {"nama": "LO'RUVA Extrait de Parfum Amber Rose", "kemasan": [{"kode": "", "nama": "Packaging Botol 50 ml"}, {"kode": "", "nama": "Spray"}, {"kode": "", "nama": "Tutup"}, {"kode": "", "nama": "Sticker Botol LO'RUVA Extrait de Parfum Amber Rose"}, {"kode": "", "nama": "Thank You Card LO'RUVA Extrait de Parfum Amber Rose"}, {"kode": "", "nama": "Inner Box"}, {"kode": "", "nama": "Sticker NA POM"}, {"kode": "", "nama": "Sticker Bulat Bening"}]}, {"nama": "LO'RUVA Extrait de Parfum Candy Blush", "kemasan": [{"kode": "", "nama": "Packaging Botol 50 ml"}, {"kode": "", "nama": "Spray"}, {"kode": "", "nama": "Tutup"}, {"kode": "", "nama": "Sticker Botol LO'RUVA Extrait de Parfum Candy Blush"}, {"kode": "", "nama": "Thank You Card LO'RUVA Extrait de Parfum Candy Blush"}, {"kode": "", "nama": "Inner Box"}, {"kode": "", "nama": "Sticker NA POM"}, {"kode": "", "nama": "Sticker Bulat Bening"}]}, {"nama": "LO'RUVA Extrait de Parfum Fresh Citrus & Santal", "kemasan": [{"kode": "", "nama": "Packaging Botol 50 ml"}, {"kode": "", "nama": "Spray"}, {"kode": "", "nama": "Tutup"}, {"kode": "", "nama": "Sticker Botol LO'RUVA Extrait de Parfum Fresh Citrus & Santal"}, {"kode": "", "nama": "Thank You Card LO'RUVA Extrait de Parfum Fresh Citrus & Santal"}, {"kode": "", "nama": "Inner Box"}, {"kode": "", "nama": "Sticker NA POM"}, {"kode": "", "nama": "Sticker Bulat Bening"}]}, {"nama": "LO'RUVA Extrait de Parfum Wood Sea Salt", "kemasan": [{"kode": "", "nama": "Packaging Botol 50 ml"}, {"kode": "", "nama": "Spray"}, {"kode": "", "nama": "Tutup"}, {"kode": "", "nama": "Sticker Botol LO'RUVA Extrait de Parfum Wood Sea Salt"}, {"kode": "", "nama": "Thank You Card LO'RUVA Extrait de Parfum Wood Sea Salt"}, {"kode": "", "nama": "Inner Box"}, {"kode": "", "nama": "Sticker NA POM"}, {"kode": "", "nama": "Sticker Bulat Bening"}]}, {"nama": "LO'RUVA Extrait de Parfume Musk Petals", "kemasan": [{"kode": "", "nama": "Packaging Botol 50 ml"}, {"kode": "", "nama": "Spray"}, {"kode": "", "nama": "Tutup"}, {"kode": "", "nama": "Sticker Botol LO'RUVA Extrait de Parfume Musk Petals"}, {"kode": "", "nama": "Thank You Card LO'RUVA Extrait de Parfume Musk Petals"}, {"kode": "", "nama": "Inner Box"}, {"kode": "", "nama": "Sticker NA POM"}, {"kode": "", "nama": "Sticker Bulat Bening"}]}, {"nama": "LO'RUVA Extrait de Parfume Saffron Woods", "kemasan": [{"kode": "", "nama": "Packaging Botol 50 ml"}, {"kode": "", "nama": "Spray"}, {"kode": "", "nama": "Tutup"}, {"kode": "", "nama": "Sticker Botol Lo'ruva Perfume Saffron woods"}, {"kode": "", "nama": "Thank You Card Lo'ruva Perfume Saffron woods"}, {"kode": "", "nama": "Inner Box"}, {"kode": "", "nama": "Sticker NA POM"}, {"kode": "", "nama": "Sticker Bulat Bening"}]}, {"nama": "LO'RUVA Extrait de Parfume Tuberose Intense", "kemasan": [{"kode": "", "nama": "Packaging Botol 50 ml"}, {"kode": "", "nama": "Spray"}, {"kode": "", "nama": "Tutup"}, {"kode": "", "nama": "Sticker Botol Lo'ruva Perfume Tuberose Intense"}, {"kode": "", "nama": "Thank You Card Lo'ruva Perfume Tuberose Intense"}, {"kode": "", "nama": "Inner Box"}, {"kode": "", "nama": "Sticker NA POM"}, {"kode": "", "nama": "Sticker Bulat Bening"}]}, {"nama": "Lo'ruva Perfume Orchid And Freesia", "kemasan": [{"kode": "", "nama": "Packaging Botol 50 ml"}, {"kode": "", "nama": "Spray"}, {"kode": "", "nama": "Tutup"}, {"kode": "", "nama": "Sticker Botol Lo'ruva Perfume Orchid And Freesia"}, {"kode": "", "nama": "Thank You Card Lo'ruva Perfume Orchid And Freesia"}, {"kode": "", "nama": "Inner Box"}, {"kode": "", "nama": "Sticker NA POM"}, {"kode": "", "nama": "Sticker Bulat Bening"}]}, {"nama": "Lo'ruva Perfume Oud Bergamot", "kemasan": [{"kode": "", "nama": "Packaging Botol 50 ml"}, {"kode": "", "nama": "Spray"}, {"kode": "", "nama": "Tutup"}, {"kode": "", "nama": "Sticker Botol Lo'ruva Perfume Oud Bergamot"}, {"kode": "", "nama": "Thank You Card Lo'ruva Perfume Oud Bergamot"}, {"kode": "", "nama": "Inner Box"}, {"kode": "", "nama": "Sticker NA POM"}, {"kode": "", "nama": "Sticker Bulat Bening"}]}, {"nama": "Lo'ruva Perfume Paris Muse", "kemasan": [{"kode": "", "nama": "Packaging Botol 50 ml"}, {"kode": "", "nama": "Spray"}, {"kode": "", "nama": "Tutup"}, {"kode": "", "nama": "Sticker Botol Lo'ruva Perfume Paris Muse"}, {"kode": "", "nama": "Thank You Card Lo'ruva Perfume Paris Muse"}, {"kode": "", "nama": "Inner Box"}, {"kode": "", "nama": "Sticker NA POM"}, {"kode": "", "nama": "Sticker Bulat Bening"}]}, {"nama": "Lo'ruva Perfume Peony Silk", "kemasan": [{"kode": "", "nama": "Packaging Botol 50 ml"}, {"kode": "", "nama": "Spray"}, {"kode": "", "nama": "Tutup"}, {"kode": "", "nama": "Sticker Botol Lo'ruva Perfume Peony Silk"}, {"kode": "", "nama": "Thank You Card Lo'ruva Perfume Peony Silk"}, {"kode": "", "nama": "Inner Box"}, {"kode": "", "nama": "Sticker NA POM"}, {"kode": "", "nama": "Sticker Bulat Bening"}]}, {"nama": "Lo'ruva Perfume Sea Salt And Sage", "kemasan": [{"kode": "", "nama": "Packaging Botol 50 ml"}, {"kode": "", "nama": "Spray"}, {"kode": "", "nama": "Tutup"}, {"kode": "", "nama": "Sticker Botol Lo'ruva Perfume Sea Salt And Sage"}, {"kode": "", "nama": "Thank You Card Lo'ruva Perfume Sea Salt And Sage"}, {"kode": "", "nama": "Inner Box"}, {"kode": "", "nama": "Sticker NA POM"}, {"kode": "", "nama": "Sticker Bulat Bening"}]}, {"nama": "Sabun Cuci Piring Ocean Fresh 5L", "kemasan": [{"kode": "", "nama": "Packaging Jerigen 5L"}, {"kode": "", "nama": "Sticker Packaging Sabun Cuci Piring Ocean Fresh"}]}];
+</script>
+<script>
+let selectedProduct = null;
+
+// ---- load live data from Google Sheets (via Apps Script Web App) ----
+function setDataStatus(msg, isError){
+  const el = document.getElementById('data_source_status');
+  el.textContent = msg;
+  el.style.color = isError ? '#C0392B' : 'var(--muted)';
+}
+
+async function loadDataFromSheet(){
+  const url = document.getElementById('webapp_url').value.trim();
+  if(!url){ setDataStatus('Isi dulu Web App URL di atas.', true); return; }
+  setDataStatus('Memuat data dari spreadsheet...');
+  try{
+    const res = await fetch(url + (url.includes('?') ? '&' : '?') + 'action=getData');
+    const json = await res.json();
+    if(!json.ok){ setDataStatus('Gagal memuat: ' + (json.error||'unknown error'), true); return; }
+    PRODUCTS.length = 0;
+    json.products.forEach(p=>PRODUCTS.push(p));
+    setDataStatus(`Berhasil memuat ${json.count} produk dari spreadsheet (baru saja).`);
+    showToast(`Data produk dimuat: ${json.count} produk.`);
+  } catch(err){
+    setDataStatus('Gagal terhubung ke spreadsheet (cek URL / buka file ini sebagai halaman web, bukan preview chat).', true);
+  }
+}
+document.getElementById('load_data_btn').addEventListener('click', ()=>{
+  loadDataFromSheet();
+  loadCategories();
+});
+
+document.getElementById('toggle_url_link').addEventListener('click', (e)=>{
+  e.preventDefault();
+  const box = document.getElementById('url_reveal_box');
+  const isHidden = box.style.display === 'none';
+  box.style.display = isHidden ? 'block' : 'none';
+  document.getElementById('toggle_url_link').textContent = isHidden ? 'sembunyikan Web App URL' : 'tampilkan Web App URL (untuk keperluan admin)';
+  if(isHidden) document.getElementById('webapp_url_display').value = val('webapp_url');
+});
+
+// auto-load kalau URL dibawa lewat query string, cth: index.html?webapp=https://script.google.com/.../exec
+(function autoLoadFromQuery(){
+  const params = new URLSearchParams(window.location.search);
+  const w = params.get('webapp');
+  if(w){
+    document.getElementById('webapp_url').value = w;
+    loadDataFromSheet();
+    loadCategories();
+  }
+})();
+
+// ---- Tabel Riwayat Generate: load, edit, duplicate ----
+function setHistoryStatus(msg, isError){
+  const el = document.getElementById('history_status');
+  el.textContent = msg;
+  el.style.color = isError ? '#C0392B' : 'var(--muted)';
+}
+
+function fmtTimestamp(iso){
+  if(!iso) return '';
+  const d = new Date(iso);
+  if(isNaN(d.getTime())) return String(iso);
+  const pad = n => String(n).padStart(2,'0');
+  return `${pad(d.getDate())}/${pad(d.getMonth()+1)}/${d.getFullYear()} ${pad(d.getHours())}:${pad(d.getMinutes())}`;
+}
+
+let HISTORY_DATA_CACHE = [];
+
+async function loadHistory(){
+  const url = val('webapp_url');
+  if(!url){ setHistoryStatus('Isi dulu Web App URL di section 0.', true); return; }
+  setHistoryStatus('Memuat riwayat...');
+  try{
+    const res = await fetch(url + (url.includes('?') ? '&' : '?') + 'action=getHistory');
+    const json = await res.json();
+    if(!json.ok){ setHistoryStatus('Gagal memuat: ' + (json.error||'unknown error'), true); return; }
+    HISTORY_DATA_CACHE = json.rows || [];
+    renderHistoryTable(HISTORY_DATA_CACHE);
+    setHistoryStatus(`${HISTORY_DATA_CACHE.length} baris riwayat dimuat.`);
+  } catch(err){
+    setHistoryStatus('Gagal terhubung ke spreadsheet.', true);
+  }
+}
+document.getElementById('refresh_history_btn').addEventListener('click', loadHistory);
+
+function historyCellInput(cls, value){
+  const v = (value===undefined||value===null) ? '' : String(value).replace(/"/g,'&quot;');
+  return `<input type="text" class="${cls}" value="${v}">`;
+}
+
+function renderHistoryTable(rows){
+  const tbody = document.getElementById('history_tbody');
+  if(!rows.length){
+    tbody.innerHTML = '<tr><td colspan="14" class="kemasan-empty">Belum ada riwayat generate.</td></tr>';
+    return;
+  }
+  tbody.innerHTML = rows.map(r => `
+    <tr data-row="${r._row}">
+      <td style="text-align:center;">${r.no}</td>
+      <td style="font-size:11px;">${fmtTimestamp(r.timestamp)}</td>
+      <td>${historyCellInput('h-nama-produk', r.nama_produk)}</td>
+      <td>${historyCellInput('h-kode-produk', r.kode_produk)}</td>
+      <td>${historyCellInput('h-nomor-batch', r.nomor_batch)}</td>
+      <td>${historyCellInput('h-batch-kg', r.besar_batch_kg)}</td>
+      <td>${historyCellInput('h-batch-pcs', r.besar_batch_pcs)}</td>
+      <td>${historyCellInput('h-tgl-mulai', r.tanggal_mulai)}</td>
+      <td>${historyCellInput('h-tgl-selesai', r.tanggal_selesai)}</td>
+      <td>${historyCellInput('h-nama-file', r.nama_file)}</td>
+      <td>${historyCellInput('h-status', r.status)}</td>
+      <td>${historyCellInput('h-catatan', r.catatan)}</td>
+      <td style="white-space:nowrap;">
+        ${r.data_json
+          ? `<button class="btn-add" style="padding:5px 8px; font-size:11px; margin-bottom:4px;" onclick="downloadWordForRow(this)">Download Word</button>
+             <button class="btn-add" style="padding:5px 8px; font-size:11px;" onclick="downloadPdfForRow(this)">Download PDF</button>`
+          : '<span style="color:var(--muted); font-size:11px;">data lama</span>'}
+      </td>
+      <td style="white-space:nowrap;">
+        <button class="btn-add" style="padding:5px 8px; font-size:11px;" onclick="saveHistoryRow(this)">Simpan</button>
+        <button class="btn-add" style="padding:5px 8px; font-size:11px;" onclick="duplicateHistoryRowUI(this)">Duplikat</button>
+      </td>
+    </tr>`).join('');
+}
+
+async function saveHistoryRow(btn){
+  const url = val('webapp_url');
+  if(!url){ showToast('Isi dulu Web App URL di section 0.'); return; }
+  const tr = btn.closest('tr');
+  const rowIndex = tr.getAttribute('data-row');
+  const fields = {
+    nama_produk: tr.querySelector('.h-nama-produk').value,
+    kode_produk: tr.querySelector('.h-kode-produk').value,
+    nomor_batch: tr.querySelector('.h-nomor-batch').value,
+    besar_batch_kg: tr.querySelector('.h-batch-kg').value,
+    besar_batch_pcs: tr.querySelector('.h-batch-pcs').value,
+    tanggal_mulai: tr.querySelector('.h-tgl-mulai').value,
+    tanggal_selesai: tr.querySelector('.h-tgl-selesai').value,
+    nama_file: tr.querySelector('.h-nama-file').value,
+    status: tr.querySelector('.h-status').value,
+    catatan: tr.querySelector('.h-catatan').value
+  };
+  btn.disabled = true; btn.textContent = 'Menyimpan...';
+  try{
+    const res = await fetch(url, {
+      method: 'POST',
+      headers: {'Content-Type': 'text/plain;charset=utf-8'},
+      body: JSON.stringify({ action: 'updateRow', row: rowIndex, fields })
+    });
+    const json = await res.json();
+    if(json.ok){ showToast('Baris ' + rowIndex + ' tersimpan.'); }
+    else { showToast('Gagal menyimpan: ' + (json.error||'unknown error')); }
+  } catch(err){
+    showToast('Gagal terhubung ke spreadsheet saat menyimpan.');
+  }
+  btn.disabled = false; btn.textContent = 'Simpan';
+}
+
+async function duplicateHistoryRowUI(btn){
+  const url = val('webapp_url');
+  if(!url){ showToast('Isi dulu Web App URL di section 0.'); return; }
+  const tr = btn.closest('tr');
+  const rowIndex = tr.getAttribute('data-row');
+  btn.disabled = true; btn.textContent = 'Menduplikat...';
+  try{
+    const res = await fetch(url, {
+      method: 'POST',
+      headers: {'Content-Type': 'text/plain;charset=utf-8'},
+      body: JSON.stringify({ action: 'duplicateRow', row: rowIndex })
+    });
+    const json = await res.json();
+    if(json.ok){
+      showToast('Baris berhasil diduplikasi ke baris ' + json.new_row + '.');
+      loadHistory();
+    } else {
+      showToast('Gagal menduplikasi: ' + (json.error||'unknown error'));
+    }
+  } catch(err){
+    showToast('Gagal terhubung ke spreadsheet saat menduplikasi.');
+  }
+  btn.disabled = false; btn.textContent = 'Duplikat';
+}
+
+function detectFlags(kemasanList){
+  const joined = kemasanList.map(k=>k.nama).join(' | ').toLowerCase();
+  return {
+    hologramBening: /hologram|bening/.test(joined),
+    shrink: /shrink/.test(joined),
+    masterBox: /master ?box/.test(joined),
+  };
+}
+
+// ---- product search ----
+const searchInput = document.getElementById('product_search');
+const resultsBox = document.getElementById('product_results');
+
+searchInput.addEventListener('input', ()=>{
+  const q = searchInput.value.trim().toLowerCase();
+  if(q.length < 1){ resultsBox.classList.remove('show'); return; }
+  const matches = PRODUCTS.filter(p=>p.nama.toLowerCase().includes(q)).slice(0,40);
+  resultsBox.innerHTML = matches.map((p,i)=>`<div data-idx="${PRODUCTS.indexOf(p)}">${p.nama}</div>`).join('') || '<div style="color:#999;cursor:default;">Tidak ditemukan</div>';
+  resultsBox.classList.add('show');
+});
+document.addEventListener('click', (e)=>{
+  if(!resultsBox.contains(e.target) && e.target !== searchInput){ resultsBox.classList.remove('show'); }
+});
+resultsBox.addEventListener('click', (e)=>{
+  const idx = e.target.getAttribute('data-idx');
+  if(idx === null) return;
+  selectProduct(PRODUCTS[parseInt(idx)]);
+  resultsBox.classList.remove('show');
+});
+
+function selectProduct(p){
+  selectedProduct = p;
+  searchInput.value = p.nama;
+  const kemasanList = p.kemasan || [];
+  document.getElementById('komponen_preview').textContent = kemasanList.length
+    ? kemasanList.map(k => `- ${k.nama}${k.kode ? '  [Kode: '+k.kode+']' : '  [Kode: belum diisi]'}`).join('\n')
+    : 'Tidak ada data kemasan untuk produk ini di sheet "Data Untuk CPB".';
+
+  const tbody = document.getElementById('kemasan_tbody');
+  if(kemasanList.length === 0){
+    tbody.innerHTML = '<tr><td colspan="2" class="kemasan-empty">Tidak ada data kemasan untuk produk ini di sheet "Data Untuk CPB".</td></tr>';
+  } else {
+    tbody.innerHTML = kemasanList.map(k => `
+      <tr>
+        <td><input type="text" class="kode-kemasan" placeholder="-" value="${(k.kode||'').replace(/"/g,'&quot;')}"></td>
+        <td><input type="text" class="nama-kemasan" value="${k.nama.replace(/"/g,'&quot;')}"></td>
+      </tr>`).join('');
+  }
+
+  const flags = detectFlags(kemasanList);
+  document.getElementById('flag_stiker').checked = flags.hologramBening;
+  document.getElementById('flag_shrink').checked = flags.shrink;
+  document.getElementById('flag_masterbox').checked = flags.masterBox;
+  document.getElementById('sub_stiker').textContent = flags.hologramBening ? 'terdeteksi pada komponen produk ini' : 'tidak terdeteksi, centang manual jika perlu';
+  document.getElementById('sub_shrink').textContent = flags.shrink ? 'terdeteksi pada komponen produk ini' : 'tidak terdeteksi, centang manual jika perlu';
+  document.getElementById('sub_masterbox').textContent = flags.masterBox ? 'terdeteksi pada komponen produk ini' : 'tidak terdeteksi, centang manual jika perlu';
+  toggleMasterBox();
+  toggleStepWrap('step_stiker_wrap', 'step_stiker_text', flags.hologramBening, DEFAULT_STEP_TEXT.stiker);
+  toggleStepWrap('step_shrink_wrap', 'step_shrink_text', flags.shrink, DEFAULT_STEP_TEXT.shrink);
+  refreshStepBatchcodeWrap();
+
+  // suggest primary container name from first component line
+  const first = (kemasanList[0] ? kemasanList[0].nama : '').toLowerCase();
+  const guess = ['tube','botol','pot','jar','sachet','jerigen'].find(k=>first.includes(k));
+  if(guess) document.getElementById('primary_container_name').value = guess;
+
+  updateFilename();
+}
+
+document.getElementById('flag_masterbox').addEventListener('change', toggleMasterBox);
+function toggleMasterBox(){
+  document.getElementById('masterbox_detail').style.display = document.getElementById('flag_masterbox').checked ? 'block' : 'none';
+}
+
+// ---- teks langkah prosedur sekunder yang bisa dipilih ada/tidak & diedit bebas ----
+const DEFAULT_STEP_TEXT = {
+  batchcode: (kemasanPrimer) => `${kemasanPrimer || 'Produk'} dan unit box dibatch code sesuai kodifikasi yang berlaku.`,
+  stiker: () => `Produk yang telah diberi batch code dimasukkan ke dalam unit box dan diberi stiker hologram, dan stiker bening.`,
+  shrink: () => `Lakukan shrink terhadap produk.`
+};
+
+function toggleStepWrap(wrapId, textareaId, show, defaultTextFn){
+  const wrap = document.getElementById(wrapId);
+  wrap.style.display = show ? 'block' : 'none';
+  const ta = document.getElementById(textareaId);
+  if(show && !ta.value.trim()){
+    ta.value = defaultTextFn();
+  }
+}
+
+function refreshStepBatchcodeWrap(){
+  const scope = document.getElementById('flag_batchcode_scope').value;
+  const show = scope === 'both' || scope === 'secondary_only';
+  const kemasanPrimer = val('primary_pack_type') || 'Kemasan';
+  toggleStepWrap('step_batchcode_wrap', 'step_batchcode_text', show, () => DEFAULT_STEP_TEXT.batchcode(kemasanPrimer));
+}
+document.getElementById('flag_batchcode_scope').addEventListener('change', refreshStepBatchcodeWrap);
+
+document.getElementById('flag_stiker').addEventListener('change', ()=>{
+  toggleStepWrap('step_stiker_wrap', 'step_stiker_text', document.getElementById('flag_stiker').checked, DEFAULT_STEP_TEXT.stiker);
+});
+document.getElementById('flag_shrink').addEventListener('change', ()=>{
+  toggleStepWrap('step_shrink_wrap', 'step_shrink_text', document.getElementById('flag_shrink').checked, DEFAULT_STEP_TEXT.shrink);
+});
+
+// ---- machines: checklist dari Kategori Data + tambahan manual ----
+let CATEGORIES_CACHE = {};
+
+function renderMachineChecklist(){
+  const container = document.getElementById('machine_checklist');
+  const list = CATEGORIES_CACHE['Peralatan'] || [];
+  if(!list.length){
+    container.innerHTML = '<span style="font-size:12.5px; color:var(--muted); font-style:italic;">Belum ada data Peralatan di sheet "Kategori Data". Tambahkan dulu di spreadsheet, lalu Sync Data lagi.</span>';
+    return;
+  }
+  container.innerHTML = list.map((name, i) => `
+    <label style="display:flex; align-items:center; gap:8px; padding:5px 0; font-size:13px; cursor:pointer;">
+      <input type="checkbox" class="machine-checkbox" value="${name.replace(/"/g,'&quot;')}" style="width:16px; height:16px;">
+      ${name}
+    </label>`).join('');
+}
+
+async function loadCategories(){
+  const url = val('webapp_url');
+  if(!url) return;
+  try{
+    const res = await fetch(url + (url.includes('?') ? '&' : '?') + 'action=getCategories');
+    const json = await res.json();
+    if(json.ok){
+      CATEGORIES_CACHE = json.categories || {};
+      renderMachineChecklist();
+    }
+  } catch(err){
+    // biarkan checklist tampil kosong dengan pesan default kalau gagal
+  }
+}
+
+const machineList = document.getElementById('machine_list');
+function addMachineRow(value=''){
+  const row = document.createElement('div');
+  row.className = 'machine-row';
+  row.innerHTML = `<input type="text" class="machine-name" placeholder="Nama mesin (belum ada di daftar)" value="${value}"><button class="btn-icon" title="Hapus">&times;</button>`;
+  row.querySelector('.btn-icon').addEventListener('click', ()=>row.remove());
+  machineList.appendChild(row);
+}
+document.getElementById('add_machine').addEventListener('click', ()=>addMachineRow());
+
+// ---- filename ----
+function slug(s){
+  return (s||'').toUpperCase().replace(/[^A-Z0-9]+/g,'_').replace(/^_+|_+$/g,'');
+}
+function updateFilename(){
+  const name = selectedProduct ? selectedProduct.nama : '';
+  const fname = `CSE_RD_PPK_026_FR_01_CATATAN_PENGEMASAN_BATCH_${slug(name)}`;
+  document.getElementById('output_filename').value = fname;
+  document.getElementById('filename_display').textContent = fname + '.docx';
+}
+document.getElementById('output_filename').addEventListener('input', ()=>{
+  document.getElementById('filename_display').textContent = (document.getElementById('output_filename').value || 'dokumen') + '.docx';
+});
+
+// ---- generate ----
+function showToast(msg){
+  const t = document.getElementById('toast');
+  t.textContent = msg;
+  t.classList.add('show');
+  setTimeout(()=>t.classList.remove('show'), 2600);
+}
+
+document.getElementById('generate_btn').addEventListener('click', async ()=>{
+  if(!selectedProduct){ showToast('Pilih nama produk terlebih dahulu.'); return; }
+
+  const required = [
+    ['doc_no','No. Dokumen'], ['doc_date','Tanggal Berlaku'],
+    ['batch_kg','Besar Batch (kg)'], ['batch_pcs','Besar Batch (pcs)'],
+    ['dosage_form','Bentuk Sediaan'], ['primary_pack_type','Jenis Kemasan Primer'],
+  ];
+  for(const [id,label] of required){
+    if(!document.getElementById(id).value.trim()){ showToast('Mohon isi: ' + label); document.getElementById(id).focus(); return; }
+  }
+
+  const kemasanRows = Array.from(document.querySelectorAll('#kemasan_tbody tr')).filter(r=>r.querySelector('.nama-kemasan')).map(r=>({
+    kode: r.querySelector('.kode-kemasan').value.trim(),
+    nama: r.querySelector('.nama-kemasan').value.trim()
+  }));
+
+  const checkedMachines = Array.from(document.querySelectorAll('.machine-checkbox:checked')).map(i=>i.value);
+  const manualMachines = Array.from(document.querySelectorAll('.machine-name')).map(i=>i.value.trim()).filter(Boolean);
+  const machines = [...checkedMachines, ...manualMachines];
+
+  const data = {
+    dokumen: {
+      no_dokumen: val('doc_no'), tanggal_berlaku: dateVal('doc_date'),
+      menggantikan_no: val('prev_doc_no') || '-', tanggal_menggantikan: val('prev_doc_date') || '-'
+    },
+    produk: {
+      nama_produk: selectedProduct.nama, kode_produk: val('product_code'),
+      nomor_batch: val('batch_no'), besar_batch_kg: val('batch_kg'), besar_batch_pcs: val('batch_pcs'),
+      bentuk_sediaan: val('dosage_form'), jenis_kemasan_primer: val('primary_pack_type'),
+      tanggal_kedaluwarsa: dateVal('expiry_date'), tanggal_mulai: dateVal('start_date'), tanggal_selesai: dateVal('end_date')
+    },
+    identitas_kemasan: {
+      tanggal: dateVal('prep_date'), ruangan: val('prep_room'), suhu: val('prep_temp'),
+      daftar_kemasan: kemasanRows
+    },
+    peralatan: machines,
+    kodifikasi: {
+      tanggal: dateVal('kodifikasi_date'), contoh_format_batch: val('format_batch'), contoh_format_exp: val('format_exp')
+    },
+    primer: {
+      tanggal: dateVal('primer_date'), ruangan: val('primer_room'), suhu: val('primer_temp'),
+      nama_kemasan_primer: val('primary_container_name'), standar_berat_kosong: val('empty_weight_std'),
+      standar_berat_isi: val('fill_weight_std'),
+      include_leaktest: document.getElementById('flag_leaktest').checked
+    },
+    sekunder: {
+      tanggal: dateVal('secondary_date'), ruangan: val('secondary_room'), suhu: val('secondary_temp'),
+      batch_code_scope: document.getElementById('flag_batchcode_scope').value, // 'both' | 'primary_only' | 'secondary_only' | 'none'
+      include_batch_code_primary: ['both','primary_only'].includes(document.getElementById('flag_batchcode_scope').value),
+      include_batch_code_secondary: ['both','secondary_only'].includes(document.getElementById('flag_batchcode_scope').value),
+      step_batchcode_text: val('step_batchcode_text'),
+      include_stiker_hologram_bening: document.getElementById('flag_stiker').checked,
+      step_stiker_text: val('step_stiker_text'),
+      include_shrink: document.getElementById('flag_shrink').checked,
+      step_shrink_text: val('step_shrink_text'),
+      include_master_box: document.getElementById('flag_masterbox').checked,
+      master_box: document.getElementById('flag_masterbox').checked ? {
+        panjang: val('mb_p'), lebar: val('mb_l'), tinggi: val('mb_t'), total_per_box: val('mb_total'),
+        standar_berat: val('mb_std'), batas_bawah: val('mb_low'), batas_atas: val('mb_high')
+      } : null
+    },
+    output_filename: val('output_filename') || ('CSE_RD_PPK_026_FR_01_CATATAN_PENGEMASAN_BATCH_' + slug(selectedProduct.nama))
+  };
+
+  const webappUrl = val('webapp_url');
+  if(!webappUrl){ showToast('Isi dulu Web App URL di section 0.'); return; }
+
+  const btn = document.getElementById('generate_btn');
+  btn.disabled = true;
+  btn.textContent = 'Menyimpan...';
+  showToast('Mencatat data ke sheet Riwayat Generate...');
+
+  try{
+    const res = await fetch(webappUrl, {
+      method: 'POST',
+      headers: {'Content-Type': 'text/plain;charset=utf-8'},
+      body: JSON.stringify(Object.assign({ action: 'logGenerate' }, data))
+    });
+    const json = await res.json();
+    if(json.ok){
+      showToast('Data tersimpan di baris ' + json.no + '. Download Word tersedia di tabel Riwayat Generate di bawah.');
+      await loadHistory();
+      document.getElementById('history_table').scrollIntoView({ behavior: 'smooth', block: 'center' });
+    } else {
+      showToast('Gagal menyimpan: ' + (json.error || 'unknown error'));
+    }
+  } catch(err){
+    showToast('Gagal terhubung ke Apps Script saat menyimpan data.');
+  }
+  btn.disabled = false;
+  btn.textContent = 'Generate Dokumen →';
+});
+
+function val(id){ return document.getElementById(id).value.trim(); }
+
+// Ambil nilai <input type="date"> (format bawaan browser: yyyy-mm-dd) dan ubah jadi
+// format Indonesia "12 Februari 2026" - dipakai untuk semua field tanggal di dokumen.
+const BULAN_ID = ['Januari','Februari','Maret','April','Mei','Juni','Juli','Agustus','September','Oktober','November','Desember'];
+function dateVal(id){
+  const raw = document.getElementById(id).value; // "" atau "yyyy-mm-dd"
+  if(!raw) return '';
+  const [y, m, d] = raw.split('-').map(Number);
+  if(!y || !m || !d) return raw;
+  return `${d} ${BULAN_ID[m-1]} ${y}`;
+}
+
+// ---- Download Word (.docx) langsung di browser, pakai docxtemplater + pizzip ----
+// Template Word ditempel langsung di sini (base64) - tidak perlu file terpisah lagi.
+function getTemplateArrayBuffer(){
+  const binaryString = atob(TEMPLATE_DOCX_BASE64);
+  const bytes = new Uint8Array(binaryString.length);
+  for (let i = 0; i < binaryString.length; i++) bytes[i] = binaryString.charCodeAt(i);
+  return bytes.buffer;
+}
+
+/**
+ * Ubah struktur data form (nested: produk/identitas_kemasan/primer/dst) jadi
+ * flat key-value + array loop, sesuai tag {tag} yang ada di template.docx.
+ */
+function hitungTekananLeakTest(jenisKemasanPrimer){
+  const jk = (jenisKemasanPrimer || '').toLowerCase();
+  const rendahTekanan = ['tube', 'pouch', 'sachet'];
+  const tinggiTekanan = ['pot', 'jar', 'botol'];
+  if(rendahTekanan.some(k => jk.includes(k))) return '0.06 mPa';
+  if(tinggiTekanan.some(k => jk.includes(k))) return '0.08 mPa';
+  return ''; // jenis kemasan tidak dikenali - dikosongkan, isi manual
+}
+
+function buildStepsSekunder(sekunder){
+  const steps = [];
+  steps.push('Lakukan line clearance pada area packaging.');
+  steps.push('Bersihkan mesin dengan alkohol 70% sampai kering menggunakan kain lap yang bersih, pastikan mesin dalam keadaan bersih dan sudah kering.');
+  if(sekunder.include_batch_code_secondary && sekunder.step_batchcode_text){
+    steps.push(sekunder.step_batchcode_text);
+  }
+  if(sekunder.include_stiker_hologram_bening && sekunder.step_stiker_text){
+    steps.push(sekunder.step_stiker_text);
+  }
+  if(sekunder.include_shrink && sekunder.step_shrink_text){
+    steps.push(sekunder.step_shrink_text);
+  }
+  steps.push('Lakukan pemeriksaan sampling untuk beberapa jumlah produk dan lakukan pemeriksaan pengawasan QC secara umum.');
+  if(sekunder.include_master_box && sekunder.master_box){
+    const mb = sekunder.master_box;
+    steps.push(`Selanjutnya produk yang sudah diberi no. batch dan tanggal kedaluwarsa, dimasukan ke dalam master box dengan susunan ${mb.panjang || '______'} x ${mb.lebar || '______'} x ${mb.tinggi || '______'}\nDengan jumlah total ${mb.total_per_box || '______'}/ masterbox.`);
+    steps.push('Lakukan pemeriksaan berat master box yang sudah diisi produk.');
+    steps.push('Selanjutnya master box dilakban dan susun di palet.');
+  }
+  steps.push('Ambil sampel pertinggal sebanyak 5 pcs dari hasil produk jadi dan catat jumlah.');
+  return steps.map((text, i) => ({ no: i + 1, text }));
+}
+
+function buildTemplateData(d){
+  const produk = d.produk || {};
+  const dok = d.dokumen || {};
+  const ik = d.identitas_kemasan || {};
+  const kod = d.kodifikasi || {};
+  const primer = d.primer || {};
+  const sekunder = d.sekunder || {};
+  const capitalize = s => s ? (s.charAt(0).toUpperCase() + s.slice(1)) : '';
+
+  return {
+    no_dokumen: dok.no_dokumen || '',
+    tanggal_berlaku: dok.tanggal_berlaku || '',
+    menggantikan_no: dok.menggantikan_no || '-',
+    tanggal_menggantikan: dok.tanggal_menggantikan || '-',
+    kode_produk: produk.kode_produk || '',
+    nama_produk: produk.nama_produk || '',
+    nomor_batch: produk.nomor_batch || '',
+    besar_batch_kg: produk.besar_batch_kg || '',
+    besar_batch_pcs: produk.besar_batch_pcs || '',
+    bentuk_sediaan: produk.bentuk_sediaan || '',
+    jenis_kemasan_primer: produk.jenis_kemasan_primer || '',
+    tanggal_kedaluwarsa: produk.tanggal_kedaluwarsa || '',
+    tanggal_mulai: produk.tanggal_mulai || '',
+    tanggal_selesai: produk.tanggal_selesai || '',
+    ik_tanggal: ik.tanggal || '',
+    ik_ruangan: ik.ruangan || '',
+    ik_suhu: ik.suhu || '',
+    kemasan: (ik.daftar_kemasan || []).map(k => ({ kode: k.kode || '', nama: k.nama || '' })),
+    peralatan: (d.peralatan || []).map((m, i) => ({ no: i + 1, nama: m })),
+    kodifikasi_tanggal: kod.tanggal || '',
+    contoh_format_batch: kod.contoh_format_batch || '',
+    contoh_format_exp: kod.contoh_format_exp || '',
+    primer_tanggal: primer.tanggal || '',
+    primer_ruangan: primer.ruangan || '',
+    primer_suhu: primer.suhu || '',
+    nama_kemasan_primer: primer.nama_kemasan_primer || '',
+    nama_kemasan_primer_cap: capitalize(primer.nama_kemasan_primer || ''),
+    standar_berat_kosong: primer.standar_berat_kosong || '',
+    standar_berat_isi: primer.standar_berat_isi || '',
+    tekanan_leak_test: hitungTekananLeakTest(produk.jenis_kemasan_primer),
+    leaktest: primer.include_leaktest ? [{}] : [],
+    no_after_leaktest: primer.include_leaktest ? '8' : '7',
+    sekunder_tanggal: sekunder.tanggal || '',
+    sekunder_ruangan: sekunder.ruangan || '',
+    sekunder_suhu: sekunder.suhu || '',
+    steps: buildStepsSekunder(sekunder)
+  };
+}
+
+async function downloadWordForRow(btn){
+  const tr = btn.closest('tr');
+  const rowIndex = tr.getAttribute('data-row');
+  const rowData = HISTORY_DATA_CACHE.find(r => String(r._row) === String(rowIndex));
+  if(!rowData || !rowData.data_json){
+    showToast('Data lengkap untuk baris ini tidak ditemukan (mungkin dibuat sebelum fitur ini aktif).');
+    return;
+  }
+  btn.disabled = true; btn.textContent = 'Menyiapkan...';
+  try{
+    const { blob, filename } = buildFilledDocxBlob(rowData);
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url; a.download = filename + '.docx';
+    document.body.appendChild(a); a.click(); document.body.removeChild(a);
+    URL.revokeObjectURL(url);
+    showToast('File Word berhasil diunduh: ' + filename + '.docx');
+  } catch(err){
+    showToast(explainDocxError(err));
+  }
+  btn.disabled = false; btn.textContent = 'Download Word';
+}
+
+/** Isi template dengan data satu baris riwayat, kembalikan {blob, filename} siap dipakai. */
+function buildFilledDocxBlob(rowData){
+  const templateBuf = getTemplateArrayBuffer();
+  const zip = new PizZip(templateBuf);
+  const doc = new Docxtemplater(zip, { paragraphLoop: true, linebreaks: true });
+  const templateData = buildTemplateData(rowData.data_json);
+  doc.render(templateData);
+  const blob = doc.getZip().generate({
+    type: 'blob',
+    mimeType: 'application/vnd.openxmlformats-officedocument.wordprocessingml.document'
+  });
+  const filename = (rowData.data_json.output_filename || rowData.nama_file || 'CATATAN_PENGEMASAN_BATCH');
+  return { blob, filename };
+}
+
+function explainDocxError(err){
+  console.error(err);
+  let msg = 'Gagal membuat dokumen: ' + (err.message || err);
+  if(err.properties && err.properties.errors){
+    msg += ' - ' + err.properties.errors.map(e => e.properties && e.properties.explanation).filter(Boolean).join('; ');
+  }
+  return msg;
+}
+
+/**
+ * Download PDF: isi template, render sebagai preview HTML di tab baru (docx-preview),
+ * lalu otomatis munculkan dialog Print browser - pilih "Save as PDF" di situ untuk
+ * benar-benar menyimpan sebagai file PDF. Ini murni di browser, tanpa server/convert online.
+ */
+async function downloadPdfForRow(btn){
+  const tr = btn.closest('tr');
+  const rowIndex = tr.getAttribute('data-row');
+  const rowData = HISTORY_DATA_CACHE.find(r => String(r._row) === String(rowIndex));
+  if(!rowData || !rowData.data_json){
+    showToast('Data lengkap untuk baris ini tidak ditemukan (mungkin dibuat sebelum fitur ini aktif).');
+    return;
+  }
+  if(typeof docx === 'undefined' || typeof docx.renderAsync !== 'function'){
+    showToast('Library preview PDF gagal dimuat. Cek koneksi internet, lalu refresh halaman.');
+    return;
+  }
+
+  // window.open HARUS dipanggil sesegera mungkin di dalam click handler,
+  // supaya tidak diblokir popup-blocker browser.
+  const printWin = window.open('', '_blank');
+  if(!printWin){
+    showToast('Tab baru diblokir browser. Izinkan pop-up untuk halaman ini, lalu coba lagi.');
+    return;
+  }
+  printWin.document.write(`<!DOCTYPE html><html><head><title>Preview PDF - ${rowData.nama_produk || ''}</title>
+    <style>
+      body{ margin:0; padding:20px; background:#fff; font-family:Arial, sans-serif; }
+      #status{ text-align:center; color:#5B6478; font-size:13px; padding:40px 0; }
+      @media print{ #status{ display:none; } }
+    </style></head><body><div id="status">Menyiapkan preview, mohon tunggu...</div><div id="container"></div></body></html>`);
+  printWin.document.close();
+
+  btn.disabled = true; btn.textContent = 'Menyiapkan...';
+  try{
+    const { blob } = buildFilledDocxBlob(rowData);
+    const container = printWin.document.getElementById('container');
+    await docx.renderAsync(blob, container, container, { inWrapper: true, breakPages: true, ignoreLastRenderedPageBreak: true });
+    const statusEl = printWin.document.getElementById('status');
+    if(statusEl) statusEl.remove();
+    showToast('Preview siap. Dialog Print akan muncul - pilih "Save as PDF" untuk menyimpan.');
+    setTimeout(()=>{ printWin.focus(); printWin.print(); }, 400);
+  } catch(err){
+    if(printWin && !printWin.closed) printWin.close();
+    showToast(explainDocxError(err));
+  }
+  btn.disabled = false; btn.textContent = 'Download PDF';
+}
+
+
+// ---- login gate ----
+document.getElementById('login_btn').addEventListener('click', async ()=>{
+  const url = document.getElementById('login_webapp_url').value.trim();
+  const username = document.getElementById('login_username').value.trim();
+  const password = document.getElementById('login_password').value;
+  const errBox = document.getElementById('login_error');
+  errBox.style.display = 'none';
+
+  if(!url || !username || !password){
+    errBox.textContent = 'Isi Web App URL, username, dan password.';
+    errBox.style.display = 'block';
+    return;
+  }
+
+  const btn = document.getElementById('login_btn');
+  btn.disabled = true;
+  btn.textContent = 'Memeriksa...';
+
+  try{
+    const res = await fetch(url, {
+      method: 'POST',
+      headers: {'Content-Type': 'text/plain;charset=utf-8'},
+      body: JSON.stringify({ action: 'login', username, password })
+    });
+    const json = await res.json();
+    if(json.ok){
+      document.getElementById('login_overlay').style.display = 'none';
+      document.getElementById('app_content').style.display = 'block';
+      document.getElementById('webapp_url').value = url;
+      loadDataFromSheet();
+      loadCategories();
+      loadHistory();
+    } else {
+      errBox.textContent = 'Username atau password salah.';
+      errBox.style.display = 'block';
+      btn.disabled = false;
+      btn.textContent = 'Masuk';
+    }
+  } catch(err){
+    errBox.textContent = 'Gagal terhubung ke Web App URL. Cek URL-nya, dan pastikan halaman ini dibuka sebagai web (GitHub Pages), bukan preview lokal.';
+    errBox.style.display = 'block';
+    btn.disabled = false;
+    btn.textContent = 'Masuk';
+  }
+});
+document.getElementById('login_password').addEventListener('keydown', (e)=>{
+  if(e.key === 'Enter') document.getElementById('login_btn').click();
+});
+</script>
+</body>
+</html>
